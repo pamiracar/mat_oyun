@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 <html lang="tr">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>Yaş 35 Labirentin Yarısı</title>
-<style>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport"
+            content="width=device-width, initial-scale=1.0, user-scalable=no">
+        <title>Yaş 35 Labirentin Yarısı</title>
+        <style>
 /* ============================================
    CSS RESET & BASE STYLES
    ============================================ */
@@ -111,7 +112,7 @@ body {
   width: 100%;
 }
 
-.start-instructions h3 {
+.start-instructions h2 {
   font-size: 0.82rem;
   color: var(--text-primary);
   margin-bottom: 10px;
@@ -127,7 +128,7 @@ body {
 }
 
 .start-instructions li {
-  font-size: 0.78rem;
+  font-size: 1rem;
   color: var(--text-secondary);
   display: flex;
   align-items: flex-start;
@@ -861,162 +862,188 @@ body {
   .dpad-container { display: none; }
 }
 </style>
-</head>
-<body>
+    </head>
+    <body>
 
-<!-- ============================================
+        <!-- ============================================
      START SCREEN
      ============================================ -->
-<div id="startScreen" class="start-screen">
-  <div class="game-logo">🔺</div>
-  <h1 class="game-title">Yaş 35 Labirentin Yarısı</h1>
-  <p class="game-subtitle">Pamir Açar - Ada Sivrioğlu - Ece Kırmacı</p>
+        <div id="startScreen" class="start-screen">
+            <div class="game-logo">🔺</div>
+            <h1 class="game-title">Yaş 35 Labirentin Yarısı</h1>
+            <p class="game-subtitle">Pamir Açar - Ada Sivrioğlu - Ece
+                Kırmacı</p>
 
-  <div class="start-instructions">
-    <h3>Nasıl Oynanır?</h3>
-    <ul>
-      <li>Labirenti geçerek altın yıldıza ★ ulaş</li>
-      <li>Yolunu kesen kapılar ⊞ seni durdurur — doğru cevabı ver, kapıyı aç!</li>
-      <li>Yön tuşları veya ekrandaki butonlarla hareket et</li>
-      <li>Sorular: <strong>VE (∧)</strong>, <strong>VEYA (∨)</strong>, <strong>İSE (⇒)</strong>, <strong>ANCAK VE ANCAK (⇔)</strong>, <strong>HER</strong>, <strong>BAZI</strong> bağlaçlarını içerir</li>
-    </ul>
-  </div>
+            <div class="start-instructions">
+                <h2>Nasıl Oynanır?</h2>
+                <ul>
+                    <li>Labirenti geçerek altın yıldıza ★ ulaş</li>
+                    <li>Yolunu kesen kapılar ⊞ seni durdurur — doğru cevabı ver,
+                        kapıyı aç!</li>
+                    <li>Yön tuşları veya ekrandaki butonlarla hareket et</li>
 
-  <div class="difficulty-select">
-    <label>Zorluk Seviyesi Seç</label>
-    <div class="difficulty-buttons" id="difficultyButtons">
-      <button class="diff-btn" data-diff="easy">Kolay</button>
-      <button class="diff-btn selected" data-diff="medium">Orta</button>
-      <button class="diff-btn" data-diff="hard">Zor</button>
-    </div>
-    <button class="start-btn" id="startBtn">Labirente Gir</button>
-  </div>
-</div>
+                </ul>
+            </div>
 
-<!-- ============================================
+            <div class="difficulty-select">
+                <label>Zorluk Seviyesi Seç</label>
+                <div class="difficulty-buttons" id="difficultyButtons">
+                    <button class="diff-btn" data-diff="easy">Kolay</button>
+                    <button class="diff-btn selected"
+                        data-diff="medium">Orta</button>
+                    <button class="diff-btn" data-diff="hard">Zor</button>
+                </div>
+                <button class="start-btn" id="startBtn">Labirente Gir</button>
+            </div>
+        </div>
+
+        <!-- ============================================
      GAME SCREEN
      ============================================ -->
-<div id="gameScreen">
+        <div id="gameScreen">
 
-  <div class="game-header">
-    <h1 class="game-title">Pisagora Bakıp Üçgen Çizdim</h1>
-    <p class="game-subtitle">Mantık kapılarını çözerek labirentten kaç</p>
-  </div>
+            <div class="game-header">
+                <h1 class="game-title">Pisagora Bakıp Üçgen Çizdim</h1>
+                <p class="game-subtitle">Mantık kapılarını çözerek labirentten
+                    kaç</p>
+            </div>
 
-  <div class="hud">
-    <button class="btn-home" id="btnHome" title="Ana Menüye Dön">⌂ Menü</button>
-    <div class="hud-item">
-      <span class="hud-label">Adım</span>
-      <span class="hud-value moves" id="hudMoves">0</span>
-    </div>
-    <div class="hud-item">
-      <span class="hud-label">Kapı</span>
-      <span class="hud-value gates" id="hudGates">0 / 0</span>
-    </div>
-    <div class="hud-item">
-      <span class="hud-label">Seviye</span>
-      <span class="hud-value level" id="hudLevel">1</span>
-    </div>
-    <div class="hud-item">
-      <span class="hud-label">Seri</span>
-      <span class="hud-value streak" id="hudStreak">0</span>
-    </div>
-  </div>
+            <div class="hud">
+                <button class="btn-home" id="btnHome" title="Ana Menüye Dön">⌂
+                    Menü</button>
+                <div class="hud-item">
+                    <span class="hud-label">Adım</span>
+                    <span class="hud-value moves" id="hudMoves">0</span>
+                </div>
+                <div class="hud-item">
+                    <span class="hud-label">Kapı</span>
+                    <span class="hud-value gates" id="hudGates">0 / 0</span>
+                </div>
+                <div class="hud-item">
+                    <span class="hud-label">Seviye</span>
+                    <span class="hud-value level" id="hudLevel">1</span>
+                </div>
+                <div class="hud-item">
+                    <span class="hud-label">Seri</span>
+                    <span class="hud-value streak" id="hudStreak">0</span>
+                </div>
+            </div>
 
-  <div class="legend">
-    <div class="legend-item"><div class="legend-swatch sw-player"></div> Sen</div>
-    <div class="legend-item"><div class="legend-swatch sw-goal">★</div> Çıkış</div>
-    <div class="legend-item"><div class="legend-swatch sw-gate">⊞</div> Kapı</div>
-    <div class="legend-item"><div class="legend-swatch sw-wall"></div> Duvar</div>
-  </div>
+            <div class="legend">
+                <div class="legend-item"><div
+                        class="legend-swatch sw-player"></div> Sen</div>
+                <div class="legend-item"><div
+                        class="legend-swatch sw-goal">★</div> Çıkış</div>
+                <div class="legend-item"><div
+                        class="legend-swatch sw-gate">⊞</div> Kapı</div>
+                <div class="legend-item"><div
+                        class="legend-swatch sw-wall"></div> Duvar</div>
+            </div>
 
-  <div class="maze-area">
-    <div class="maze-container" id="mazeGrid"></div>
-  </div>
+            <div class="maze-area">
+                <div class="maze-container" id="mazeGrid"></div>
+            </div>
 
-  <div class="dpad-container">
-    <div class="dpad">
-      <button class="dpad-btn" data-dir="up" aria-label="Yukarı">▲</button>
-      <button class="dpad-btn" data-dir="left" aria-label="Sol">◀</button>
-      <button class="dpad-btn" data-dir="right" aria-label="Sağ">▶</button>
-      <button class="dpad-btn" data-dir="down" aria-label="Aşağı">▼</button>
-    </div>
-  </div>
-</div>
+            <div class="dpad-container">
+                <div class="dpad">
+                    <button class="dpad-btn" data-dir="up"
+                        aria-label="Yukarı">▲</button>
+                    <button class="dpad-btn" data-dir="left"
+                        aria-label="Sol">◀</button>
+                    <button class="dpad-btn" data-dir="right"
+                        aria-label="Sağ">▶</button>
+                    <button class="dpad-btn" data-dir="down"
+                        aria-label="Aşağı">▼</button>
+                </div>
+            </div>
+        </div>
 
-<!-- ============================================
+        <!-- ============================================
      LOGIC GATE MODAL
      ============================================ -->
-<div class="modal-overlay" id="gateModal">
-  <div class="modal" id="gateModalContent">
-    <div class="modal-icon">🔒</div>
-    <div class="modal-title">Mantık Kapısı</div>
-    <div class="modal-description">Kapıyı açmak için soruyu doğru cevapla.</div>
-    <div class="logic-question">
-      <div class="logic-given" id="logicGivenLabel">Verilen</div>
-      <div class="logic-variables" id="logicVars"></div>
-      <div class="logic-expression" id="logicExpr"></div>
-      <div class="logic-prompt" id="logicPrompt">Doğruluk değeri nedir?</div>
-    </div>
-    <div class="answer-buttons" id="answerButtons"></div>
-    <div class="feedback-text" id="feedbackText"></div>
-  </div>
-</div>
+        <div class="modal-overlay" id="gateModal">
+            <div class="modal" id="gateModalContent">
+                <div class="modal-icon">🔒</div>
+                <div class="modal-title">Mantık Kapısı</div>
+                <div class="modal-description">Kapıyı açmak için soruyu doğru
+                    cevapla.</div>
+                <div class="logic-question">
+                    <div class="logic-given" id="logicGivenLabel">Verilen</div>
+                    <div class="logic-variables" id="logicVars"></div>
+                    <div class="logic-expression" id="logicExpr"></div>
+                    <div class="logic-prompt" id="logicPrompt">Doğruluk değeri
+                        nedir?</div>
+                </div>
+                <div class="answer-buttons" id="answerButtons"></div>
+                <div class="feedback-text" id="feedbackText"></div>
+            </div>
+        </div>
 
-<!-- ============================================
+        <!-- ============================================
      WIN MODAL
      ============================================ -->
-<div class="modal-overlay" id="winModal">
-  <div class="modal">
-    <div class="modal-icon">🎉</div>
-    <div class="modal-title" style="color:var(--goal);">Labirentten Kaçtın!</div>
-    <div class="modal-description">Harika mantıksal düşünce! Labirenti fethettın.</div>
-    <div class="win-stats">
-      <div class="win-stat">
-        <div class="win-stat-value" id="winMoves" style="color:var(--player);">0</div>
-        <div class="win-stat-label">Adım</div>
-      </div>
-      <div class="win-stat">
-        <div class="win-stat-value" id="winGates" style="color:var(--gate);">0</div>
-        <div class="win-stat-label">Kapı Açıldı</div>
-      </div>
-      <div class="win-stat">
-        <div class="win-stat-value" id="winAttempts" style="color:var(--wrong);">0</div>
-        <div class="win-stat-label">Yanlış Cevap</div>
-      </div>
-      <div class="win-stat">
-        <div class="win-stat-value" id="winStreak" style="color:var(--correct);">0</div>
-        <div class="win-stat-label">En İyi Seri</div>
-      </div>
-    </div>
-    <div class="win-buttons">
-      <button class="btn btn-primary" id="btnNextLevel">Sonraki Seviye →</button>
-      <button class="btn btn-secondary" id="btnWinHome">Ana Menüye Dön</button>
-    </div>
-  </div>
-</div>
+        <div class="modal-overlay" id="winModal">
+            <div class="modal">
+                <div class="modal-icon">🎉</div>
+                <div class="modal-title" style="color:var(--goal);">Labirentten
+                    Kaçtın!</div>
+                <div class="modal-description">Harika mantıksal düşünce!
+                    Labirenti fethettın.</div>
+                <div class="win-stats">
+                    <div class="win-stat">
+                        <div class="win-stat-value" id="winMoves"
+                            style="color:var(--player);">0</div>
+                        <div class="win-stat-label">Adım</div>
+                    </div>
+                    <div class="win-stat">
+                        <div class="win-stat-value" id="winGates"
+                            style="color:var(--gate);">0</div>
+                        <div class="win-stat-label">Kapı Açıldı</div>
+                    </div>
+                    <div class="win-stat">
+                        <div class="win-stat-value" id="winAttempts"
+                            style="color:var(--wrong);">0</div>
+                        <div class="win-stat-label">Yanlış Cevap</div>
+                    </div>
+                    <div class="win-stat">
+                        <div class="win-stat-value" id="winStreak"
+                            style="color:var(--correct);">0</div>
+                        <div class="win-stat-label">En İyi Seri</div>
+                    </div>
+                </div>
+                <div class="win-buttons">
+                    <button class="btn btn-primary" id="btnNextLevel">Sonraki
+                        Seviye →</button>
+                    <button class="btn btn-secondary" id="btnWinHome">Ana Menüye
+                        Dön</button>
+                </div>
+            </div>
+        </div>
 
-<!-- ============================================
+        <!-- ============================================
      CONFIRM HOME MODAL
      ============================================ -->
-<div class="modal-overlay" id="confirmModal">
-  <div class="modal">
-    <div class="modal-icon">🏠</div>
-    <div class="modal-title">Ana Menüye Dön?</div>
-    <div class="modal-description">Mevcut ilerlemen kaybolacak. Emin misin?</div>
-    <div class="confirm-buttons">
-      <button class="btn btn-secondary" id="btnCancelHome">Hayır, Devam Et</button>
-      <button class="btn btn-danger" id="btnConfirmHome">Evet, Çık</button>
-    </div>
-  </div>
-</div>
+        <div class="modal-overlay" id="confirmModal">
+            <div class="modal">
+                <div class="modal-icon">🏠</div>
+                <div class="modal-title">Ana Menüye Dön?</div>
+                <div class="modal-description">Mevcut ilerlemen kaybolacak. Emin
+                    misin?</div>
+                <div class="confirm-buttons">
+                    <button class="btn btn-secondary" id="btnCancelHome">Hayır,
+                        Devam Et</button>
+                    <button class="btn btn-danger" id="btnConfirmHome">Evet,
+                        Çık</button>
+                </div>
+            </div>
+        </div>
 
-<div class="confetti-container" id="confettiContainer"></div>
+        <div class="confetti-container" id="confettiContainer"></div>
 
-<!-- ============================================
+        <!-- ============================================
      JAVASCRIPT - GAME ENGINE
      ============================================ -->
-<script>
+        <script>
 /**
  * ============================================
  * Pisagora Bakıp Üçgen Çizdim
@@ -2162,5 +2189,5 @@ class LogicLabyrinth {
    ============================================ */
 const game = new LogicLabyrinth();
 </script>
-</body>
+    </body>
 </html>
