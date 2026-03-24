@@ -1,2193 +1,1320 @@
 <!DOCTYPE html>
 <html lang="tr">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport"
-            content="width=device-width, initial-scale=1.0, user-scalable=no">
-        <title>Yaş 35 Labirentin Yarısı</title>
-        <style>
-/* ============================================
-   CSS RESET & BASE STYLES
-   ============================================ */
-*, *::before, *::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
-:root {
-  --bg-primary: #0f0f1a;
-  --bg-secondary: #1a1a2e;
-  --bg-tertiary: #16213e;
-  --bg-card: #1e1e36;
-  --player: #b388ff;
-  --player-glow: rgba(179, 136, 255, 0.4);
-  --goal: #ffd54f;
-  --goal-glow: rgba(255, 213, 79, 0.4);
-  --gate: #ff8a65;
-  --gate-glow: rgba(255, 138, 101, 0.3);
-  --wall: #2a2a4a;
-  --wall-highlight: #3a3a5e;
-  --path: #12122a;
-  --correct: #69f0ae;
-  --correct-glow: rgba(105, 240, 174, 0.3);
-  --wrong: #ef5350;
-  --wrong-glow: rgba(239, 83, 80, 0.3);
-  --text-primary: #e8e8f0;
-  --text-secondary: #9e9eb8;
-  --text-muted: #6e6e8a;
-  --border: #2e2e4e;
-  --cell-size: 32px;
-  --border-radius: 8px;
-  --transition-speed: 0.25s;
-}
-
-html, body {
-  height: 100%;
-  overflow: hidden;
-}
-
-body {
-  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-  background: var(--bg-primary);
-  color: var(--text-primary);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-height: 100dvh;
-  overflow: hidden;
-  -webkit-tap-highlight-color: transparent;
-  user-select: none;
-}
-
-/* ============================================
-   START SCREEN
-   ============================================ */
-.start-screen {
-  text-align: center;
-  animation: fadeIn 0.6s ease-out;
-  padding: 20px;
-  max-width: 480px;
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  max-height: 100dvh;
-  overflow-y: auto;
-}
-
-.start-screen .game-logo {
-  font-size: 3rem;
-  margin-bottom: 6px;
-}
-
-.start-screen .game-title {
-  font-size: 1.7rem;
-  font-weight: 800;
-  letter-spacing: 0.5px;
-  background: linear-gradient(135deg, var(--player), var(--goal));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  margin-bottom: 4px;
-  line-height: 1.3;
-}
-
-.start-screen .game-subtitle {
-  font-size: 0.72rem;
-  color: var(--text-muted);
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  margin-bottom: 20px;
-}
-
-.start-instructions {
-  background: var(--bg-secondary);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 16px 20px;
-  margin-bottom: 24px;
-  text-align: left;
-  width: 100%;
-}
-
-.start-instructions h2 {
-  font-size: 0.82rem;
-  color: var(--text-primary);
-  margin-bottom: 10px;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-}
-
-.start-instructions ul {
-  list-style: none;
-  display: flex;
-  flex-direction: column;
-  gap: 7px;
-}
-
-.start-instructions li {
-  font-size: 1rem;
-  color: var(--text-secondary);
-  display: flex;
-  align-items: flex-start;
-  gap: 8px;
-  line-height: 1.45;
-}
-
-.start-instructions li::before {
-  content: '›';
-  color: var(--player);
-  font-weight: 700;
-  font-size: 1rem;
-  flex-shrink: 0;
-}
-
-/* Difficulty Selection */
-.difficulty-select {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  align-items: center;
-  width: 100%;
-}
-
-.difficulty-select label {
-  font-size: 0.72rem;
-  color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 1px;
-}
-
-.difficulty-buttons {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-  justify-content: center;
-  width: 100%;
-}
-
-.diff-btn {
-  padding: 12px 24px;
-  border: 2px solid var(--border);
-  border-radius: 12px;
-  background: var(--bg-secondary);
-  color: var(--text-secondary);
-  font-size: 0.85rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all var(--transition-speed) ease;
-  font-family: inherit;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  flex: 1;
-  min-width: 100px;
-  max-width: 160px;
-}
-
-.diff-btn:hover {
-  border-color: var(--player);
-  color: var(--player);
-  background: rgba(179,136,255,0.08);
-  transform: translateY(-1px);
-}
-
-.diff-btn.selected {
-  border-color: var(--player);
-  color: var(--player);
-  background: rgba(179,136,255,0.15);
-  box-shadow: 0 0 16px var(--player-glow);
-  transform: translateY(-1px);
-}
-
-.diff-btn:active {
-  transform: scale(0.97);
-}
-
-.start-btn {
-  padding: 14px 48px;
-  border: none;
-  border-radius: 14px;
-  background: linear-gradient(135deg, var(--player), #7c4dff);
-  color: white;
-  font-size: 1rem;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all var(--transition-speed) ease;
-  font-family: inherit;
-  letter-spacing: 1px;
-  margin-top: 4px;
-  box-shadow: 0 4px 20px rgba(179, 136, 255, 0.3);
-}
-
-.start-btn:hover {
-  box-shadow: 0 4px 30px rgba(179, 136, 255, 0.5);
-  transform: translateY(-2px);
-}
-
-.start-btn:active {
-  transform: scale(0.97);
-}
-
-/* ============================================
-   GAME SCREEN — full height flex layout
-   ============================================ */
-#gameScreen {
-  display: none;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
-  width: 100%;
-  height: 100dvh;
-  padding: 6px 8px;
-  gap: 4px;
-  overflow: hidden;
-}
-
-/* ============================================
-   HEADER / HUD
-   ============================================ */
-.game-header {
-  text-align: center;
-  flex-shrink: 0;
-  padding: 2px 0;
-}
-
-.game-title {
-  font-size: 1.1rem;
-  font-weight: 700;
-  letter-spacing: 0.5px;
-  background: linear-gradient(135deg, var(--player), var(--goal));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  margin-bottom: 1px;
-}
-
-.game-subtitle {
-  font-size: 0.6rem;
-  color: var(--text-muted);
-  letter-spacing: 2px;
-  text-transform: uppercase;
-}
-
-.hud {
-  display: flex;
-  gap: 6px;
-  justify-content: center;
-  align-items: center;
-  flex-shrink: 0;
-  flex-wrap: wrap;
-  padding: 2px 0;
-}
-
-.hud-item {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  background: var(--bg-secondary);
-  border: 1px solid var(--border);
-  border-radius: 20px;
-  padding: 3px 10px;
-  font-size: 0.7rem;
-}
-
-.hud-label {
-  color: var(--text-muted);
-  font-size: 0.6rem;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-}
-
-.hud-value {
-  font-weight: 700;
-  color: var(--text-primary);
-  font-variant-numeric: tabular-nums;
-}
-
-.hud-value.moves { color: var(--player); }
-.hud-value.gates { color: var(--gate); }
-.hud-value.level { color: var(--goal); }
-.hud-value.streak { color: var(--correct); }
-
-/* Home Button */
-.btn-home {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  background: rgba(239,83,80,0.08);
-  border: 1px solid rgba(239,83,80,0.35);
-  border-radius: 20px;
-  padding: 3px 10px;
-  font-size: 0.68rem;
-  font-weight: 600;
-  color: #ef9a9a;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  font-family: inherit;
-  letter-spacing: 0.5px;
-}
-
-.btn-home:hover {
-  background: rgba(239,83,80,0.18);
-  border-color: var(--wrong);
-  color: #ffcdd2;
-}
-
-.btn-home:active { transform: scale(0.95); }
-
-/* ============================================
-   LEGEND
-   ============================================ */
-.legend {
-  display: flex;
-  gap: 10px;
-  justify-content: center;
-  flex-wrap: wrap;
-  flex-shrink: 0;
-  padding: 1px 0;
-}
-
-.legend-item {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 0.6rem;
-  color: var(--text-muted);
-}
-
-.legend-swatch {
-  width: 12px;
-  height: 12px;
-  border-radius: 3px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.55rem;
-}
-
-.legend-swatch.sw-player { background: var(--player); border-radius: 50%; width: 10px; height: 10px; }
-.legend-swatch.sw-goal { color: var(--goal); font-size: 0.7rem; }
-.legend-swatch.sw-gate { background: rgba(255,138,101,0.15); border: 1px solid var(--gate); color: var(--gate); font-size: 0.6rem; }
-.legend-swatch.sw-wall { background: var(--wall); border: 1px solid var(--wall-highlight); }
-
-/* ============================================
-   MAZE GRID — centered in remaining space
-   ============================================ */
-.maze-area {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 0;
-  width: 100%;
-  overflow: hidden;
-}
-
-.maze-container {
-  display: grid;
-  gap: 1px;
-  background: var(--bg-primary);
-  border: 2px solid var(--border);
-  border-radius: var(--border-radius);
-  padding: 2px;
-  box-shadow: 0 0 30px rgba(0,0,0,0.4), inset 0 0 20px rgba(0,0,0,0.15);
-}
-
-.cell {
-  width: var(--cell-size);
-  height: var(--cell-size);
-  border-radius: 2px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.9rem;
-  transition: all var(--transition-speed) ease;
-  position: relative;
-}
-
-.cell-wall {
-  background: var(--wall);
-  border: 1px solid var(--wall-highlight);
-  box-shadow: inset 0 1px 2px rgba(255,255,255,0.03);
-}
-
-.cell-path { background: var(--path); }
-.cell-player { background: var(--path); z-index: 2; }
-
-.cell-player::after {
-  content: '';
-  width: 55%;
-  height: 55%;
-  background: var(--player);
-  border-radius: 50%;
-  box-shadow: 0 0 10px var(--player-glow), 0 0 20px var(--player-glow);
-  animation: playerPulse 2s ease-in-out infinite;
-}
-
-.cell-goal { background: var(--path); }
-.cell-goal::after {
-  content: '★';
-  font-size: calc(var(--cell-size) * 0.6);
-  color: var(--goal);
-  text-shadow: 0 0 8px var(--goal-glow), 0 0 16px var(--goal-glow);
-  animation: goalPulse 1.5s ease-in-out infinite;
-}
-
-.cell-gate {
-  background: linear-gradient(135deg, rgba(255,138,101,0.15), rgba(255,138,101,0.05));
-  border: 1px solid var(--gate);
-  cursor: pointer;
-}
-
-.cell-gate::after {
-  content: '⊞';
-  font-size: calc(var(--cell-size) * 0.55);
-  color: var(--gate);
-  text-shadow: 0 0 6px var(--gate-glow);
-  animation: gatePulse 2s ease-in-out infinite;
-}
-
-.cell-gate-open {
-  background: var(--path);
-  border: 1px solid transparent;
-  animation: gateOpen 0.4s ease-out;
-}
-.cell-gate-open::after { content: ''; }
-
-/* ============================================
-   ANIMATIONS
-   ============================================ */
-@keyframes playerPulse {
-  0%, 100% { transform: scale(1); opacity: 1; }
-  50% { transform: scale(1.15); opacity: 0.85; }
-}
-@keyframes goalPulse {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.2); }
-}
-@keyframes gatePulse {
-  0%, 100% { opacity: 0.8; }
-  50% { opacity: 1; }
-}
-@keyframes gateOpen {
-  0% { transform: scale(1); background: rgba(105,240,174,0.2); }
-  50% { transform: scale(1.1); }
-  100% { transform: scale(1); background: var(--path); }
-}
-@keyframes shake {
-  0%, 100% { transform: translateX(0); }
-  10%, 50%, 90% { transform: translateX(-4px); }
-  30%, 70% { transform: translateX(4px); }
-}
-.shake { animation: shake 0.45s ease-in-out; }
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: scale(0.96); }
-  to { opacity: 1; transform: scale(1); }
-}
-@keyframes confettiFall {
-  0% { transform: translateY(-10px) rotate(0deg) scale(1); opacity: 1; }
-  100% { transform: translateY(100vh) rotate(1080deg) scale(0.5); opacity: 0; }
-}
-
-/* ============================================
-   MOBILE D-PAD CONTROLS
-   ============================================ */
-.dpad-container {
-  flex-shrink: 0;
-  padding: 4px 0 8px;
-}
-
-.dpad {
-  display: grid;
-  grid-template-areas:
-    ". up ."
-    "left . right"
-    ". down .";
-  grid-template-columns: repeat(3, 50px);
-  grid-template-rows: repeat(3, 50px);
-  gap: 4px;
-  justify-content: center;
-}
-
-.dpad-btn {
-  background: var(--bg-secondary);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  color: var(--text-secondary);
-  font-size: 1.2rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.15s ease;
-  -webkit-tap-highlight-color: transparent;
-  touch-action: manipulation;
-}
-
-.dpad-btn:active {
-  background: var(--bg-tertiary);
-  color: var(--player);
-  border-color: var(--player);
-  transform: scale(0.92);
-}
-
-.dpad-btn[data-dir="up"]    { grid-area: up; }
-.dpad-btn[data-dir="left"]  { grid-area: left; }
-.dpad-btn[data-dir="right"] { grid-area: right; }
-.dpad-btn[data-dir="down"]  { grid-area: down; }
-
-/* ============================================
-   MODAL OVERLAY
-   ============================================ */
-.modal-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.72);
-  backdrop-filter: blur(6px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 100;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.3s ease;
-  padding: 16px;
-}
-
-.modal-overlay.active {
-  opacity: 1;
-  pointer-events: auto;
-}
-
-.modal {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  padding: 22px 24px;
-  max-width: 480px;
-  width: 100%;
-  text-align: center;
-  animation: fadeIn 0.3s ease-out;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.6);
-  max-height: 88dvh;
-  overflow-y: auto;
-}
-
-.modal-icon { font-size: 2rem; margin-bottom: 6px; }
-.modal-title {
-  font-size: 1.15rem;
-  font-weight: 700;
-  margin-bottom: 4px;
-  color: var(--text-primary);
-}
-.modal-description {
-  color: var(--text-secondary);
-  font-size: 0.8rem;
-  margin-bottom: 14px;
-  line-height: 1.5;
-}
-
-/* Logic Question Display */
-.logic-question {
-  background: var(--bg-primary);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 14px;
-  margin-bottom: 16px;
-}
-
-.logic-given {
-  font-size: 0.68rem;
-  color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  margin-bottom: 6px;
-}
-
-.logic-variables {
-  display: flex;
-  gap: 8px;
-  justify-content: center;
-  margin-bottom: 10px;
-  flex-wrap: wrap;
-}
-
-.logic-var {
-  background: var(--bg-secondary);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 3px 10px;
-  font-size: 0.8rem;
-  font-weight: 600;
-}
-
-.logic-var .var-true { color: var(--correct); }
-.logic-var .var-false { color: var(--wrong); }
-
-.logic-expression {
-  font-size: 1rem;
-  font-weight: 700;
-  color: var(--text-primary);
-  letter-spacing: 0.3px;
-  padding: 6px 4px;
-  font-family: 'Courier New', monospace;
-  line-height: 1.6;
-}
-
-.logic-prompt {
-  font-size: 0.75rem;
-  color: var(--text-muted);
-  margin-top: 5px;
-}
-
-/* Answer Buttons */
-.answer-buttons {
-  display: flex;
-  gap: 8px;
-  justify-content: center;
-  flex-wrap: wrap;
-}
-
-.btn {
-  padding: 10px 28px;
-  border: 2px solid transparent;
-  border-radius: 12px;
-  font-size: 0.9rem;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all var(--transition-speed) ease;
-  letter-spacing: 0.5px;
-  font-family: inherit;
-  min-width: 90px;
-}
-
-.btn:active { transform: scale(0.96); }
-
-.btn-true {
-  background: rgba(105,240,174,0.1);
-  color: var(--correct);
-  border-color: var(--correct);
-}
-.btn-true:hover {
-  background: rgba(105,240,174,0.2);
-  box-shadow: 0 0 20px var(--correct-glow);
-}
-
-.btn-false {
-  background: rgba(239,83,80,0.1);
-  color: var(--wrong);
-  border-color: var(--wrong);
-}
-.btn-false:hover {
-  background: rgba(239,83,80,0.2);
-  box-shadow: 0 0 20px var(--wrong-glow);
-}
-
-.answer-buttons .btn-choice {
-  background: rgba(179,136,255,0.06);
-  color: var(--text-primary);
-  border-color: var(--border);
-  padding: 9px 14px;
-  font-size: 0.82rem;
-  min-width: 80px;
-  letter-spacing: 0;
-  font-weight: 500;
-  text-align: left;
-  width: 100%;
-}
-
-.answer-buttons .btn-choice:hover {
-  border-color: var(--player);
-  background: rgba(179,136,255,0.13);
-  box-shadow: 0 0 10px var(--player-glow);
-}
-
-.btn-primary {
-  background: linear-gradient(135deg, var(--player), #7c4dff);
-  color: white;
-  border: none;
-  padding: 12px 32px;
-  font-size: 0.92rem;
-}
-.btn-primary:hover {
-  box-shadow: 0 0 25px var(--player-glow);
-  transform: translateY(-1px);
-}
-
-.btn-secondary {
-  background: var(--bg-secondary);
-  color: var(--text-secondary);
-  border-color: var(--border);
-  padding: 9px 20px;
-  font-size: 0.8rem;
-}
-.btn-secondary:hover {
-  border-color: var(--text-muted);
-  color: var(--text-primary);
-}
-
-.btn-danger {
-  background: rgba(239,83,80,0.12);
-  color: #ef9a9a;
-  border: 2px solid rgba(239,83,80,0.45);
-  padding: 10px 24px;
-  font-size: 0.88rem;
-}
-.btn-danger:hover {
-  background: rgba(239,83,80,0.25);
-  border-color: var(--wrong);
-  box-shadow: 0 0 14px var(--wrong-glow);
-}
-
-.modal.feedback-correct {
-  border-color: var(--correct);
-  box-shadow: 0 0 30px var(--correct-glow);
-}
-.modal.feedback-wrong {
-  border-color: var(--wrong);
-  box-shadow: 0 0 30px var(--wrong-glow);
-  animation: shake 0.45s ease-in-out;
-}
-
-.feedback-text {
-  margin-top: 10px;
-  padding: 10px 12px;
-  border-radius: 8px;
-  font-size: 0.78rem;
-  line-height: 1.5;
-  display: none;
-  text-align: left;
-}
-.feedback-text.show { display: block; }
-.feedback-text.correct-text {
-  background: rgba(105,240,174,0.08);
-  border: 1px solid rgba(105,240,174,0.2);
-  color: var(--correct);
-}
-.feedback-text.wrong-text {
-  background: rgba(239,83,80,0.08);
-  border: 1px solid rgba(239,83,80,0.2);
-  color: #ef9a9a;
-}
-
-/* ============================================
-   WIN MODAL
-   ============================================ */
-.win-stats {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-  margin: 14px 0;
-}
-.win-stat {
-  background: var(--bg-primary);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 10px;
-}
-.win-stat-value { font-size: 1.3rem; font-weight: 700; }
-.win-stat-label {
-  font-size: 0.65rem;
-  color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 1px;
-}
-.win-buttons {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  align-items: center;
-}
-
-/* Confirm Buttons */
-.confirm-buttons {
-  display: flex;
-  gap: 10px;
-  justify-content: center;
-  margin-top: 16px;
-  flex-wrap: wrap;
-}
-
-/* ============================================
-   CONFETTI
-   ============================================ */
-.confetti-container {
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 200;
-  overflow: hidden;
-}
-.confetti-piece {
-  position: absolute;
-  width: 8px;
-  height: 8px;
-  border-radius: 2px;
-  animation: confettiFall linear forwards;
-}
-
-/* ============================================
-   RESPONSIVE — Mobile
-   ============================================ */
-@media (max-width: 600px) {
-  .start-screen .game-title { font-size: 1.35rem; }
-  .start-screen .game-logo { font-size: 2.2rem; }
-  .diff-btn { padding: 10px 16px; font-size: 0.78rem; }
-  .start-btn { padding: 12px 36px; font-size: 0.92rem; }
-  .game-title { font-size: 0.95rem; }
-  .hud { gap: 4px; }
-  .hud-item { padding: 2px 7px; font-size: 0.62rem; }
-  .hud-label { font-size: 0.54rem; }
-  .btn-home { padding: 2px 7px; font-size: 0.6rem; }
-  .legend { gap: 6px; }
-  .legend-item { font-size: 0.55rem; }
-  .maze-container { padding: 2px; }
-  .modal { padding: 16px 14px; }
-  .logic-expression { font-size: 0.88rem; }
-  .btn { padding: 8px 20px; font-size: 0.8rem; min-width: 70px; }
-  .answer-buttons .btn-choice { padding: 8px 12px; font-size: 0.78rem; }
-  .dpad { grid-template-columns: repeat(3, 46px); grid-template-rows: repeat(3, 46px); }
-}
-
-@media (max-width: 380px) {
-  .dpad { grid-template-columns: repeat(3, 42px); grid-template-rows: repeat(3, 42px); }
-  .game-header { display: none; }
-}
-
-/* Hide D-pad on desktop (mouse/trackpad devices) */
-@media (hover: hover) and (pointer: fine) {
-  .dpad-container { display: none; }
-}
-</style>
-    </head>
-    <body>
-
-        <!-- ============================================
-     START SCREEN
-     ============================================ -->
-        <div id="startScreen" class="start-screen">
-            <div class="game-logo">🔺</div>
-            <h1 class="game-title">Yaş 35 Labirentin Yarısı</h1>
-            <p class="game-subtitle">Pamir Açar - Ada Sivrioğlu - Ece
-                Kırmacı</p>
-
-            <div class="start-instructions">
-                <h2>Nasıl Oynanır?</h2>
-                <ul>
-                    <li>Labirenti geçerek altın yıldıza ★ ulaş</li>
-                    <li>Yolunu kesen kapılar ⊞ seni durdurur — doğru cevabı ver,
-                        kapıyı aç!</li>
-                    <li>Yön tuşları veya ekrandaki butonlarla hareket et</li>
-
-                </ul>
-            </div>
-
-            <div class="difficulty-select">
-                <label>Zorluk Seviyesi Seç</label>
-                <div class="difficulty-buttons" id="difficultyButtons">
-                    <button class="diff-btn" data-diff="easy">Kolay</button>
-                    <button class="diff-btn selected"
-                        data-diff="medium">Orta</button>
-                    <button class="diff-btn" data-diff="hard">Zor</button>
-                </div>
-                <button class="start-btn" id="startBtn">Labirente Gir</button>
-            </div>
-        </div>
-
-        <!-- ============================================
-     GAME SCREEN
-     ============================================ -->
-        <div id="gameScreen">
-
-            <div class="game-header">
-                <h1 class="game-title">Pisagora Bakıp Üçgen Çizdim</h1>
-                <p class="game-subtitle">Mantık kapılarını çözerek labirentten
-                    kaç</p>
-            </div>
-
-            <div class="hud">
-                <button class="btn-home" id="btnHome" title="Ana Menüye Dön">⌂
-                    Menü</button>
-                <div class="hud-item">
-                    <span class="hud-label">Adım</span>
-                    <span class="hud-value moves" id="hudMoves">0</span>
-                </div>
-                <div class="hud-item">
-                    <span class="hud-label">Kapı</span>
-                    <span class="hud-value gates" id="hudGates">0 / 0</span>
-                </div>
-                <div class="hud-item">
-                    <span class="hud-label">Seviye</span>
-                    <span class="hud-value level" id="hudLevel">1</span>
-                </div>
-                <div class="hud-item">
-                    <span class="hud-label">Seri</span>
-                    <span class="hud-value streak" id="hudStreak">0</span>
-                </div>
-            </div>
-
-            <div class="legend">
-                <div class="legend-item"><div
-                        class="legend-swatch sw-player"></div> Sen</div>
-                <div class="legend-item"><div
-                        class="legend-swatch sw-goal">★</div> Çıkış</div>
-                <div class="legend-item"><div
-                        class="legend-swatch sw-gate">⊞</div> Kapı</div>
-                <div class="legend-item"><div
-                        class="legend-swatch sw-wall"></div> Duvar</div>
-            </div>
-
-            <div class="maze-area">
-                <div class="maze-container" id="mazeGrid"></div>
-            </div>
-
-            <div class="dpad-container">
-                <div class="dpad">
-                    <button class="dpad-btn" data-dir="up"
-                        aria-label="Yukarı">▲</button>
-                    <button class="dpad-btn" data-dir="left"
-                        aria-label="Sol">◀</button>
-                    <button class="dpad-btn" data-dir="right"
-                        aria-label="Sağ">▶</button>
-                    <button class="dpad-btn" data-dir="down"
-                        aria-label="Aşağı">▼</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- ============================================
-     LOGIC GATE MODAL
-     ============================================ -->
-        <div class="modal-overlay" id="gateModal">
-            <div class="modal" id="gateModalContent">
-                <div class="modal-icon">🔒</div>
-                <div class="modal-title">Mantık Kapısı</div>
-                <div class="modal-description">Kapıyı açmak için soruyu doğru
-                    cevapla.</div>
-                <div class="logic-question">
-                    <div class="logic-given" id="logicGivenLabel">Verilen</div>
-                    <div class="logic-variables" id="logicVars"></div>
-                    <div class="logic-expression" id="logicExpr"></div>
-                    <div class="logic-prompt" id="logicPrompt">Doğruluk değeri
-                        nedir?</div>
-                </div>
-                <div class="answer-buttons" id="answerButtons"></div>
-                <div class="feedback-text" id="feedbackText"></div>
-            </div>
-        </div>
-
-        <!-- ============================================
-     WIN MODAL
-     ============================================ -->
-        <div class="modal-overlay" id="winModal">
-            <div class="modal">
-                <div class="modal-icon">🎉</div>
-                <div class="modal-title" style="color:var(--goal);">Labirentten
-                    Kaçtın!</div>
-                <div class="modal-description">Harika mantıksal düşünce!
-                    Labirenti fethettın.</div>
-                <div class="win-stats">
-                    <div class="win-stat">
-                        <div class="win-stat-value" id="winMoves"
-                            style="color:var(--player);">0</div>
-                        <div class="win-stat-label">Adım</div>
-                    </div>
-                    <div class="win-stat">
-                        <div class="win-stat-value" id="winGates"
-                            style="color:var(--gate);">0</div>
-                        <div class="win-stat-label">Kapı Açıldı</div>
-                    </div>
-                    <div class="win-stat">
-                        <div class="win-stat-value" id="winAttempts"
-                            style="color:var(--wrong);">0</div>
-                        <div class="win-stat-label">Yanlış Cevap</div>
-                    </div>
-                    <div class="win-stat">
-                        <div class="win-stat-value" id="winStreak"
-                            style="color:var(--correct);">0</div>
-                        <div class="win-stat-label">En İyi Seri</div>
-                    </div>
-                </div>
-                <div class="win-buttons">
-                    <button class="btn btn-primary" id="btnNextLevel">Sonraki
-                        Seviye →</button>
-                    <button class="btn btn-secondary" id="btnWinHome">Ana Menüye
-                        Dön</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- ============================================
-     CONFIRM HOME MODAL
-     ============================================ -->
-        <div class="modal-overlay" id="confirmModal">
-            <div class="modal">
-                <div class="modal-icon">🏠</div>
-                <div class="modal-title">Ana Menüye Dön?</div>
-                <div class="modal-description">Mevcut ilerlemen kaybolacak. Emin
-                    misin?</div>
-                <div class="confirm-buttons">
-                    <button class="btn btn-secondary" id="btnCancelHome">Hayır,
-                        Devam Et</button>
-                    <button class="btn btn-danger" id="btnConfirmHome">Evet,
-                        Çık</button>
-                </div>
-            </div>
-        </div>
-
-        <div class="confetti-container" id="confettiContainer"></div>
-
-        <!-- ============================================
-     JAVASCRIPT - GAME ENGINE
-     ============================================ -->
-        <script>
-/**
- * ============================================
- * Pisagora Bakıp Üçgen Çizdim
- * Önermeler Mantığı Oyunu — 9. Sınıf
- * ============================================
- */
-
-const CELL = { WALL: 0, PATH: 1, PLAYER: 2, GOAL: 3, GATE: 4, GATE_OPEN: 5 };
-
-/**
- * =============================================
- * SORU ÜRETİCİ
- * 9. Sınıf Önermeler Mantığı
- * =============================================
- */
-class QuestionGenerator {
-  constructor() {
-    this.askedHashes = new Set();
-    this.questionTypes = {
-      easy: [
-        'veVeya', 'veVeya', 'veVeya',
-        'onermeMi', 'onermeMi',
-        'dogrulukDegeri', 'dogrulukDegeri',
-        'ise', 'ise',
-        'hepsiVeBazisi', 'hepsiVeBazisi',
-        'baglaciAni',
-        'anceVeAncak',
-      ],
-      medium: [
-        'veVeya', 'veVeya',
-        'ise', 'ise', 'ise',
-        'bilesikIki',
-        'anceVeAncak', 'anceVeAncak',
-        'ters', 'karsit', 'karsiters',
-        'hepsiVeBazisi', 'hepsiVeBazisi',
-        'onermeMi',
-        'dogrulukDegeri',
-        'totoloji', 'celiski',
-        'denk',
-        'baglaciAni',
-      ],
-      hard: [
-        'bilesikIki', 'bilesikIki', 'bilesikIki',
-        'bilesikUc', 'bilesikUc',
-        'ance_bilesik',
-        'ters', 'karsit', 'karsiters',
-        'totoloji', 'celiski',
-        'denk', 'denk',
-        'hepsiVeBazisi', 'hepsiVeBazisi',
-        'dogrulukSatiri',
-        'anceVeAncak',
-        'bilesikUcKarmasik',
-      ]
-    };
-  }
-
-  generate(difficulty) {
-    const types = this.questionTypes[difficulty] || this.questionTypes.medium;
-    let attempts = 0, q;
-    do {
-      const type = types[Math.floor(Math.random() * types.length)];
-      q = this[type](difficulty);
-      attempts++;
-    } while (this.askedHashes.has(q._hash) && attempts < 40);
-    if (this.askedHashes.size > 120) this.askedHashes.clear();
-    this.askedHashes.add(q._hash);
-    return q;
-  }
-
-  _rb() { return Math.random() < 0.5; }
-  _bstr(v) { return v ? 'Doğru' : 'Yanlış'; }
-  _h(s) {
-    let h = 0;
-    for (let i = 0; i < s.length; i++) h = ((h << 5) - h + s.charCodeAt(i)) | 0;
-    return h + '_' + Math.random().toString(36).slice(2, 7);
-  }
-  _shuffle(arr) {
-    const a = [...arr];
-    for (let i = a.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [a[i], a[j]] = [a[j], a[i]];
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Yaş 35 Labirentin Yarısı</title>
+  <style>
+    :root {
+      --bg: #1a1a2e;
+      --panel: #20243b;
+      --panel-2: #2a2f4d;
+      --text: #e6e9f2;
+      --muted: #a9b0c7;
+      --wall: #5a648f;
+      --player: #b388ff;
+      --goal: #ffd166;
+      --gate: #7b8cff;
+      --correct: #64e6c3;
+      --wrong: #ff8d8d;
+      --focus: #9fa8ff;
+      --shadow: 0 12px 28px rgba(0, 0, 0, 0.35);
+      --radius: 14px;
+      --cell-size: clamp(20px, 6vw, 42px);
     }
-    return a;
-  }
-  _makeVars(n) {
-    const names = ['p', 'q', 'r', 's'].slice(0, n);
-    const obj = {};
-    names.forEach(k => obj[k] = this._rb());
-    return obj;
-  }
 
-  /* 1. VE / VEYA */
-  veVeya() {
-    const vars = this._makeVars(2);
-    const [a, b] = Object.keys(vars);
-    const isAnd = this._rb();
-    const result = isAnd ? (vars[a] && vars[b]) : (vars[a] || vars[b]);
-    const symbol = isAnd ? '∧' : '∨';
-    return {
-      vars,
-      expression: `${a} ${symbol} ${b}`,
-      answer: result,
-      answerType: 'boolean',
-      explanation: isAnd
-        ? `"${a} VE ${b}" önermesi, her iki taraf da Doğru olduğunda Doğru'dur. ${this._bstr(vars[a])} VE ${this._bstr(vars[b])} → ${this._bstr(result)}`
-        : `"${a} VEYA ${b}" önermesi, en az bir taraf Doğru olduğunda Doğru'dur. ${this._bstr(vars[a])} VEYA ${this._bstr(vars[b])} → ${this._bstr(result)}`,
-      _hash: this._h(`veveya_${symbol}_${vars[a]}_${vars[b]}`)
-    };
-  }
-
-  /* 2. İSE */
-  ise() {
-    const tip = Math.floor(Math.random() * 3);
-    if (tip === 0) {
-      const vars = this._makeVars(2);
-      const [a, b] = Object.keys(vars);
-      const result = !vars[a] || vars[b];
-      return {
-        vars,
-        expression: `${a} ⇒ ${b}`,
-        answer: result,
-        answerType: 'boolean',
-        explanation: `"Eğer ${a} ise ${b}" yalnızca öncül Doğru, sonuç Yanlış olduğunda Yanlış'tır. ${a}=${this._bstr(vars[a])}, ${b}=${this._bstr(vars[b])} → ${this._bstr(result)}`,
-        _hash: this._h(`ise_hes_${vars[a]}_${vars[b]}`)
-      };
+    * {
+      box-sizing: border-box;
     }
-    if (tip === 1) {
-      const shuffled = this._shuffle(['p Doğru, q Yanlış', 'p Yanlış, q Doğru', 'p Yanlış, q Yanlış', 'p Doğru, q Doğru']);
-      return {
-        vars: null,
-        expression: '"Eğer p ise q" önermesi hangi durumda Yanlış olur?',
-        answer: shuffled.indexOf('p Doğru, q Yanlış'),
-        answerType: 'choice',
-        choices: shuffled,
-        explanation: '"Eğer p ise q" (p ⇒ q) yalnızca öncül (p) Doğru, sonuç (q) Yanlış olduğunda Yanlış\'tır.',
-        _hash: this._h('ise_kural_yanlis')
-      };
+
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      min-height: 100%;
+      font-family: "Inter", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: radial-gradient(circle at top, #23264a 0%, var(--bg) 45%);
+      color: var(--text);
     }
-    const shuffled = this._shuffle(['Her zaman Doğru', 'Her zaman Yanlış', 'Sonuca bağlı', 'Belirsizdir']);
-    return {
-      vars: null,
-      expression: '"Eğer p ise q" önermesinde p Yanlış ise, önermenin doğruluk değeri ne olur?',
-      answer: shuffled.indexOf('Her zaman Doğru'),
-      answerType: 'choice',
-      choices: shuffled,
-      explanation: 'Öncül (p) Yanlış olduğunda, "Eğer p ise q" önermesi sonuç ne olursa olsun Doğru\'dur.',
-      _hash: this._h('ise_oncul_yanlis')
-    };
-  }
 
-  /* 3. ÖNERME Mİ? */
-  onermeMi() {
-    const liste = [
-      { text: '"Ankara, Türkiye\'nin başkentidir."', cevap: true, aciklama: 'Kesin doğruluk değeri belirlenebilir → önermedir.' },
-      { text: '"5 bir asal sayıdır."', cevap: true, aciklama: 'Kesin doğru → önermedir.' },
-      { text: '"2 + 3 = 6"', cevap: true, aciklama: 'Kesin yanlış (sonuç 5) → yine de önermedir.' },
-      { text: '"Her dikdörtgen bir karedir."', cevap: true, aciklama: 'Kesin yanlış bir önerme → önermedir.' },
-      { text: '"√4 = 2"', cevap: true, aciklama: 'Kesin doğru → önermedir.' },
-      { text: '"1 bir asal sayıdır."', cevap: true, aciklama: 'Kesin yanlış (1 asal değil) → önermedir.' },
-      { text: '"Bir üçgenin iç açıları toplamı 180°\'dir."', cevap: true, aciklama: 'Kesin doğru → önermedir.' },
-      { text: '"Bugün hava güzeldir."', cevap: false, aciklama: 'Doğruluk değeri kişiye ve güne göre değişir → önerme değildir.' },
-      { text: '"x + 2 = 5"', cevap: false, aciklama: 'x bilinmediğinden kesin değer belirlenemez → açık önerme, önerme sayılmaz.' },
-      { text: '"Kapıyı kapat!"', cevap: false, aciklama: 'Emir cümlesi doğru/yanlış olmaz → önerme değildir.' },
-      { text: '"Kaç yaşındasın?"', cevap: false, aciklama: 'Soru cümlesi önerme değildir.' },
-      { text: '"Bu cümle yanlıştır."', cevap: false, aciklama: 'Paradoks içerdiğinden önerme değildir.' },
-      { text: '"n bir çift sayıdır."', cevap: false, aciklama: 'n bilinmediğinde doğruluk değeri belirsiz → önerme değildir.' },
-      { text: '"Ne güzel bir gün!"', cevap: false, aciklama: 'Ünlem cümlesi önerme değildir.' },
-      { text: '"π irrasyonel bir sayıdır."', cevap: true, aciklama: 'Kesin doğru → önermedir.' },
-      { text: '"İstanbul, Türkiye\'nin başkentidir."', cevap: true, aciklama: 'Yanlış ama kesin doğruluk değeri var → yanlış bir önermedir, yine de önermedir.' },
-    ];
-    const item = liste[Math.floor(Math.random() * liste.length)];
-    return {
-      vars: null,
-      expression: `${item.text}\n\nBu bir önerme midir?`,
-      answer: item.cevap,
-      answerType: 'boolean',
-      answerLabels: ['Evet, önermedir', 'Hayır, önerme değildir'],
-      explanation: item.aciklama,
-      _hash: this._h('onermemi_' + item.text)
-    };
-  }
-
-  /* 4. DOĞRULUK DEĞERİ */
-  dogrulukDegeri() {
-    const liste = [
-      { text: '"3 + 4 = 7"', val: true },
-      { text: '"5 bir çift sayıdır."', val: false },
-      { text: '"Her kare bir dikdörtgendir."', val: true },
-      { text: '"Her dikdörtgen bir karedir."', val: false },
-      { text: '"İstanbul, Türkiye\'nin başkentidir."', val: false },
-      { text: '"0 pozitif bir sayıdır."', val: false },
-      { text: '"Bir üçgenin iç açıları toplamı 180°\'dir."', val: true },
-      { text: '"2 bir asal sayıdır."', val: true },
-      { text: '"1 bir asal sayıdır."', val: false },
-      { text: '"√9 = 3"', val: true },
-      { text: '"−3 bir doğal sayıdır."', val: false },
-      { text: '"10, 4\'ün katıdır."', val: false },
-      { text: '"Boş küme her kümenin alt kümesidir."', val: true },
-      { text: '"Bir doğrunun iki uç noktası vardır."', val: false },
-      { text: '"Her asal sayı tektir."', val: false },
-      { text: '"2 × 3 = 6"', val: true },
-    ];
-    const item = liste[Math.floor(Math.random() * liste.length)];
-    return {
-      vars: null,
-      expression: `${item.text}\n\nBu önermenin doğruluk değeri nedir?`,
-      answer: item.val,
-      answerType: 'boolean',
-      explanation: `Bu önerme ${this._bstr(item.val)} değerlidir.`,
-      _hash: this._h('dogval_' + item.text)
-    };
-  }
-
-  /* 5. HER ve BAZI */
-  hepsiVeBazisi() {
-    const sorular = [
-      { soru: '"Her asal sayı tektir." önermesi doğru mudur?', cevap: false, aciklama: 'Yanlış — 2 hem asal hem çifttir.' },
-      { soru: '"Bazı üçgenler eşkenar üçgendir." önermesi doğru mudur?', cevap: true, aciklama: 'Doğru — eşkenar üçgenler vardır.' },
-      { soru: '"Her doğal sayı pozitiftir." önermesi doğru mudur?', cevap: false, aciklama: 'Yanlış — 0 bir doğal sayıdır ancak pozitif değildir.' },
-      { soru: '"Bazı rasyonel sayılar tam sayıdır." önermesi doğru mudur?', cevap: true, aciklama: 'Doğru — örneğin 3 hem tam sayı hem rasyonel sayıdır.' },
-      { soru: '"Her kare bir dikdörtgendir." önermesi doğru mudur?', cevap: true, aciklama: 'Doğru — her karenin dört iç açısı 90° olduğundan dikdörtgendir.' },
-      { soru: '"Bazı tek sayılar asal sayıdır." önermesi doğru mudur?', cevap: true, aciklama: 'Doğru — 3, 5, 7 hem tek hem asaldır.' },
-      { soru: '"Her üçgen eşkenardır." önermesi doğru mudur?', cevap: false, aciklama: 'Yanlış — ikizkenar, çeşitkenar üçgenler de vardır.' },
-      { soru: '"Bazı karekökler irrasyoneldir." önermesi doğru mudur?', cevap: true, aciklama: 'Doğru — √2 irrasyoneldir.' },
-      { soru: '"Her rasyonel sayı bir tam sayıdır." önermesi doğru mudur?', cevap: false, aciklama: 'Yanlış — 1/2 rasyoneldir ama tam sayı değildir.' },
-      { soru: '"Bazı ikizkenar üçgenler eşkenardır." önermesi doğru mudur?', cevap: true, aciklama: 'Doğru — eşkenar üçgen aynı zamanda ikizkenardır.' },
-      { soru: '"Her çift sayı 4\'e bölünür." önermesi doğru mudur?', cevap: false, aciklama: 'Yanlış — 6 çifttir ama 4\'e bölünmez.' },
-      { soru: '"Bazı asal sayılar çifttir." önermesi doğru mudur?', cevap: true, aciklama: 'Doğru — 2 tek çift asal sayıdır.' },
-      { soru: '"Her tam sayı rasyonel sayıdır." önermesi doğru mudur?', cevap: true, aciklama: 'Doğru — her tam sayı n/1 biçiminde yazılabilir.' },
-      { soru: '"Bazı doğal sayılar negatiftir." önermesi doğru mudur?', cevap: false, aciklama: 'Yanlış — doğal sayılar 0, 1, 2, ... şeklindedir.' },
-      { soru: '"Her dikdörtgen bir karedir." önermesi doğru mudur?', cevap: false, aciklama: 'Yanlış — dikdörtgenin kenarları eşit olmak zorunda değildir.' },
-      {
-        soru: '"Her p bir q\'dur." önermesinin yanlışlanması için ne yeterlidir?',
-        cevap: 0,
-        answerType: 'choice',
-        choices: ['q olmayan en az bir p bulmak', 'Tüm p\'lerin q olduğunu göstermek', 'Bazı q\'ların p olmadığını göstermek', 'Hiçbir p\'nin q olmadığını göstermek'],
-        aciklama: '"Her … dır." biçimindeki bir önermeyi çürütmek için tek bir karşı örnek yeterlidir.'
-      },
-      {
-        soru: '"Her p, q\'dur." önermesi sembolik olarak nasıl yazılır?',
-        cevap: 0,
-        answerType: 'choice',
-        choices: ['p ⇒ q', 'p ∧ q', 'p ∨ q', 'p ⇔ q'],
-        aciklama: '"Her p, q\'dur." ifadesi mantıkta p ⇒ q biçiminde yazılır.'
-      },
-      {
-        soru: '"Bazı p\'ler q\'dur." önermesi doğru olmak için ne gereklidir?',
-        cevap: 0,
-        answerType: 'choice',
-        choices: ['En az bir p\'nin q olması', 'Tüm p\'lerin q olması', 'Hiçbir p\'nin q olmaması', 'p ile q\'nun eşdeğer olması'],
-        aciklama: '"Bazı …" önermesi, koşulu sağlayan en az bir eleman bulunduğunda Doğru\'dur.'
-      },
-    ];
-    const item = sorular[Math.floor(Math.random() * sorular.length)];
-    if (item.answerType === 'choice') {
-      const shuffled = this._shuffle(item.choices);
-      const correctText = item.choices[item.cevap];
-      return {
-        vars: null,
-        expression: item.soru,
-        answer: shuffled.indexOf(correctText),
-        answerType: 'choice',
-        choices: shuffled,
-        explanation: item.aciklama,
-        _hash: this._h('hepsbazi_' + item.soru)
-      };
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
     }
-    return {
-      vars: null,
-      expression: item.soru,
-      answer: item.cevap,
-      answerType: 'boolean',
-      explanation: item.aciklama,
-      _hash: this._h('hepsbazi_' + item.soru)
-    };
-  }
 
-  /* 6. BAĞLACI TANI */
-  baglaciAni() {
-    const liste = [
-      { sembol: '∧', dogru: '"p ve q" — ikisi de doğruysa doğrudur', yanlis: ['"p veya q" — en az biri doğruysa doğrudur', '"Eğer p ise q" — p doğru q yanlışsa yanlıştır', '"p ancak ve ancak q" — ikisi aynıysa doğrudur'] },
-      { sembol: '∨', dogru: '"p veya q" — en az biri doğruysa doğrudur', yanlis: ['"p ve q" — ikisi de doğruysa doğrudur', '"Eğer p ise q"', '"p ancak ve ancak q"'] },
-      { sembol: '⇒', dogru: '"Eğer p ise q" — p doğru, q yanlışsa yanlıştır', yanlis: ['"p ve q"', '"p veya q"', '"p ancak ve ancak q"'] },
-      { sembol: '⇔', dogru: '"p ancak ve ancak q" — ikisi aynı değerdeyse doğrudur', yanlis: ['"Eğer p ise q"', '"p ve q"', '"p veya q"'] },
-    ];
-    const item = liste[Math.floor(Math.random() * liste.length)];
-    const choices = this._shuffle([item.dogru, ...item.yanlis.slice(0, 3)]);
-    return {
-      vars: null,
-      expression: `"${item.sembol}" sembolü ne anlama gelir?`,
-      answer: choices.indexOf(item.dogru),
-      answerType: 'choice',
-      choices,
-      explanation: `"${item.sembol}" sembolü şu anlama gelir: ${item.dogru}`,
-      _hash: this._h('bagani_' + item.sembol)
-    };
-  }
-
-  /* 7. ANCAK VE ANCAK (⇔) */
-  anceVeAncak() {
-    const tip = Math.floor(Math.random() * 3);
-    if (tip === 0) {
-      const vars = this._makeVars(2);
-      const [a, b] = Object.keys(vars);
-      const result = vars[a] === vars[b];
-      return {
-        vars,
-        expression: `${a} ⇔ ${b}`,
-        answer: result,
-        answerType: 'boolean',
-        explanation: `"p ancak ve ancak q" iki taraf aynı değerdeyse Doğru'dur. ${a}=${this._bstr(vars[a])}, ${b}=${this._bstr(vars[b])} → ${this._bstr(result)}`,
-        _hash: this._h(`ava_hes_${vars[a]}_${vars[b]}`)
-      };
+    .app {
+      width: min(100%, 1100px);
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1rem;
     }
-    if (tip === 1) {
-      const shuffled = this._shuffle([
-        'İkisi de Doğru veya ikisi de Yanlış olduğunda',
-        'En az biri Doğru olduğunda',
-        'Birinci Doğru, ikincisi Yanlış olduğunda',
-        'Her zaman'
-      ]);
-      return {
-        vars: null,
-        expression: '"p ancak ve ancak q" (p ⇔ q) önermesi ne zaman Doğru olur?',
-        answer: shuffled.indexOf('İkisi de Doğru veya ikisi de Yanlış olduğunda'),
-        answerType: 'choice',
-        choices: shuffled,
-        explanation: '"p ⇔ q" önermesi, p ve q aynı doğruluk değerinde olduğunda Doğru\'dur.',
-        _hash: this._h('ava_kural')
-      };
+
+    .screen.hidden {
+      display: none;
     }
-    const liste = [
-      { soru: '"Bir sayı çiftse ve yalnızca çiftse 2\'ye bölünür." Bu önerme doğru mudur?', cevap: true, aciklama: 'Doğru — çift sayı ⟺ 2\'ye tam bölünme.' },
-      { soru: '"Bir sayı 6\'ya bölünür ancak ve ancak hem 2\'ye hem 3\'e bölünürse." Doğru mudur?', cevap: true, aciklama: 'Doğru — 6 = 2 × 3 olduğundan iki koşul eşdeğerdir.' },
-    ];
-    const item = liste[Math.floor(Math.random() * liste.length)];
-    return {
-      vars: null,
-      expression: item.soru,
-      answer: item.cevap,
-      answerType: 'boolean',
-      explanation: item.aciklama,
-      _hash: this._h('ava_gercek_' + item.soru)
-    };
-  }
 
-  /* 8. BİLEŞİK — 2 işlemli */
-  bilesikIki(difficulty) {
-    const vars = this._makeVars(difficulty === 'hard' ? 3 : 2);
-    const keys = Object.keys(vars);
-    const [a, b, c] = keys;
-    const sablonlar = [
-      { expr: `(${a} ∧ ${b}) ∨ ${c || a}`, result: (vars[a] && vars[b]) || (vars[c] ?? vars[a]), expl: `Önce ${a}∧${b}=${this._bstr(vars[a]&&vars[b])}, sonra VEYA ${c||a}` },
-      { expr: `${a} ∧ (${b} ∨ ${c || b})`, result: vars[a] && (vars[b] || (vars[c] ?? vars[b])), expl: `Önce ${b}∨${c||b}=${this._bstr(vars[b]||(vars[c]??vars[b]))}, sonra VE ${a}` },
-      { expr: `${a} ⇒ (${b} ∧ ${c || b})`, result: !vars[a] || (vars[b] && (vars[c] ?? vars[b])), expl: `${b}∧${c||b}=${this._bstr(vars[b]&&(vars[c]??vars[b]))}, sonra ${a}⇒...` },
-      { expr: `(${a} ∨ ${b}) ⇒ ${c || a}`, result: !(vars[a] || vars[b]) || (vars[c] ?? vars[a]), expl: `${a}∨${b}=${this._bstr(vars[a]||vars[b])}, sonra ⇒ ${c||a}` },
-      { expr: `(${a} ⇒ ${b}) ∧ ${c || a}`, result: (!vars[a] || vars[b]) && (vars[c] ?? vars[a]), expl: `${a}⇒${b}=${this._bstr(!vars[a]||vars[b])}, sonra ∧${c||a}` },
-      { expr: `${a} ⇔ (${b} ∧ ${c || b})`, result: vars[a] === (vars[b] && (vars[c] ?? vars[b])), expl: `${b}∧${c||b}=${this._bstr(vars[b]&&(vars[c]??vars[b]))}, sonra ⇔${a}` },
-    ];
-    const s = sablonlar[Math.floor(Math.random() * sablonlar.length)];
-    return {
-      vars,
-      expression: s.expr,
-      answer: s.result,
-      answerType: 'boolean',
-      explanation: s.expl + ` → Sonuç: ${this._bstr(s.result)}`,
-      _hash: this._h(`bil2_${s.expr}_${JSON.stringify(vars)}`)
-    };
-  }
+    .home-card {
+      position: relative;
+      overflow: hidden;
+      border-radius: 22px;
+      border: 1px solid rgba(159, 168, 255, 0.3);
+      background:
+        radial-gradient(circle at 12% 15%, rgba(100, 230, 195, 0.22), transparent 38%),
+        radial-gradient(circle at 88% 12%, rgba(179, 136, 255, 0.2), transparent 35%),
+        linear-gradient(140deg, #1f2446 0%, #1b2040 45%, #171b35 100%);
+      box-shadow: 0 20px 46px rgba(5, 7, 18, 0.58);
+      padding: 1.4rem;
+      display: grid;
+      gap: 1rem;
+    }
 
-  /* 9. BİLEŞİK — 3 işlemli */
-  bilesikUc() {
-    const vars = this._makeVars(3);
-    const {p, q, r} = vars;
-    const sablonlar = [
-      { expr:'(p ∧ q) ⇒ r', result:!(p&&q)||r, expl:`p∧q=${this._bstr(p&&q)}, sonra ⇒r=${this._bstr(r)}` },
-      { expr:'p ⇒ (q ∨ r)', result:!p||(q||r), expl:`q∨r=${this._bstr(q||r)}, sonra p⇒...` },
-      { expr:'(p ∨ q) ∧ r', result:(p||q)&&r, expl:`p∨q=${this._bstr(p||q)}, sonra ∧r=${this._bstr(r)}` },
-      { expr:'(p ∧ q) ∨ (p ∧ r)', result:(p&&q)||(p&&r), expl:`Dağılma: p∧(q∨r)` },
-      { expr:'(p ⇒ q) ∧ (q ⇒ r)', result:(!p||q)&&(!q||r), expl:`Geçişlilik zinciri` },
-      { expr:'p ∧ (q ⇒ r)', result:p&&(!q||r), expl:`q⇒r=${this._bstr(!q||r)}, sonra ∧p` },
-      { expr:'(p ∨ q) ⇒ (p ∧ r)', result:!(p||q)||(p&&r), expl:`p∨q=${this._bstr(p||q)}, p∧r=${this._bstr(p&&r)}` },
-      { expr:'p ⇔ (q ∧ r)', result:p===(q&&r), expl:`q∧r=${this._bstr(q&&r)}, sonra p⇔...` },
-    ];
-    const s = sablonlar[Math.floor(Math.random() * sablonlar.length)];
-    return {
-      vars,
-      expression: s.expr,
-      answer: s.result,
-      answerType: 'boolean',
-      explanation: s.expl + ` → Sonuç: ${this._bstr(s.result)}`,
-      _hash: this._h(`bil3_${s.expr}_${JSON.stringify(vars)}`)
-    };
-  }
+    .home-card::before {
+      content: "";
+      position: absolute;
+      width: 280px;
+      height: 280px;
+      right: -95px;
+      bottom: -110px;
+      background: radial-gradient(circle, rgba(123, 140, 255, 0.23), transparent 70%);
+      pointer-events: none;
+    }
 
-  /* 10. BİLEŞİK — 3 işlemli KARMAŞIK */
-  bilesikUcKarmasik() {
-    const vars = this._makeVars(3);
-    const {p, q, r} = vars;
-    const sablonlar = [
-      { expr:'(p ⇒ q) ⇒ (q ⇒ r)', result:!(!p||q)||((!q)||r), expl:`p⇒q=${this._bstr(!p||q)}, q⇒r=${this._bstr(!q||r)}, sonra birleştir` },
-      { expr:'(p ∧ q) ⇔ (p ∨ r)', result:(p&&q)===(p||r), expl:`p∧q=${this._bstr(p&&q)}, p∨r=${this._bstr(p||r)}, sonra ⇔` },
-      { expr:'p ⇒ (q ⇔ r)', result:!p||(q===r), expl:`q⇔r=${this._bstr(q===r)}, sonra p⇒...` },
-      { expr:'(p ∨ q) ∧ (r ⇒ p)', result:(p||q)&&(!r||p), expl:`p∨q=${this._bstr(p||q)}, r⇒p=${this._bstr(!r||p)}` },
-      { expr:'(p ⇒ r) ∧ (q ⇒ r)', result:(!p||r)&&(!q||r), expl:`Her iki koşullu da sağlanmalı` },
-    ];
-    const s = sablonlar[Math.floor(Math.random() * sablonlar.length)];
-    return {
-      vars,
-      expression: s.expr,
-      answer: s.result,
-      answerType: 'boolean',
-      explanation: s.expl + ` → Sonuç: ${this._bstr(s.result)}`,
-      _hash: this._h(`bil3k_${s.expr}_${JSON.stringify(vars)}`)
-    };
-  }
+    .hero-badge {
+      display: inline-flex;
+      width: fit-content;
+      padding: 0.3rem 0.65rem;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.17);
+      background: rgba(255, 255, 255, 0.06);
+      font-size: 0.75rem;
+      color: #e3e7ff;
+      letter-spacing: 0.4px;
+      text-transform: uppercase;
+    }
 
-  /* 11. TERS ÖNERME */
-  ters() {
-    const liste = [
-      { orijinal:'"Yağmur yağarsa yerler ıslanır."', ters:'"Yerler ıslanırsa yağmur yağmıştır."', karsit:'"Yağmur yağmazsa yerler ıslanmaz."', ktersit:'"Yerler ıslanmazsa yağmur yağmamıştır."' },
-      { orijinal:'"Bir sayı 4\'e bölünürse 2\'ye de bölünür."', ters:'"Bir sayı 2\'ye bölünürse 4\'e de bölünür."', karsit:'"Bir sayı 4\'e bölünmezse 2\'ye de bölünmez."', ktersit:'"Bir sayı 2\'ye bölünmezse 4\'e de bölünmez."' },
-      { orijinal:'"Çalışırsan sınavı geçersin."', ters:'"Sınavı geçersen çalışmışsındır."', karsit:'"Çalışmazsan sınavı geçemezsin."', ktersit:'"Sınavı geçemezsen çalışmamışsındır."' },
-      { orijinal:'"Hava soğuksa kar yağar."', ters:'"Kar yağarsa hava soğuktur."', karsit:'"Hava soğuk değilse kar yağmaz."', ktersit:'"Kar yağmazsa hava soğuk değildir."' },
-      { orijinal:'"Aç olursan yersin."', ters:'"Yersen aç olmuşsundur."', karsit:'"Aç olmazsan yemezsin."', ktersit:'"Yemezsen aç değilsindir."' },
-    ];
-    const item = liste[Math.floor(Math.random() * liste.length)];
-    const choices = this._shuffle([item.ters, item.karsit, item.ktersit]);
-    return {
-      vars: null,
-      expression: `${item.orijinal}\n\nBu önermenin TERSİ hangisidir?\n(p ⇒ q ise ters: q ⇒ p)`,
-      answer: choices.indexOf(item.ters),
-      answerType: 'choice',
-      choices,
-      explanation: `Ters önerme: öncül ve sonuç yer değiştirir. → ${item.ters}`,
-      _hash: this._h('ters_' + item.orijinal)
-    };
-  }
+    .home-top {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      gap: 0.6rem;
+    }
 
-  /* 12. KARŞIT ÖNERME */
-  karsit() {
-    const liste = [
-      { orijinal:'"Yağmur yağarsa yerler ıslanır."', ters:'"Yerler ıslanırsa yağmur yağmıştır."', karsit:'"Yağmur yağmazsa yerler ıslanmaz."', ktersit:'"Yerler ıslanmazsa yağmur yağmamıştır."' },
-      { orijinal:'"Çalışırsan sınavı geçersin."', ters:'"Sınavı geçersen çalışmışsındır."', karsit:'"Çalışmazsan sınavı geçemezsin."', ktersit:'"Sınavı geçemezsen çalışmamışsındır."' },
-      { orijinal:'"Hava soğuksa kar yağar."', ters:'"Kar yağarsa hava soğuktur."', karsit:'"Hava soğuk değilse kar yağmaz."', ktersit:'"Kar yağmazsa hava soğuk değildir."' },
-    ];
-    const item = liste[Math.floor(Math.random() * liste.length)];
-    const choices = this._shuffle([item.ters, item.karsit, item.ktersit]);
-    return {
-      vars: null,
-      expression: `${item.orijinal}\n\nBu önermenin KARŞITI hangisidir?\n(Hem öncül hem sonuç tersine döner)`,
-      answer: choices.indexOf(item.karsit),
-      answerType: 'choice',
-      choices,
-      explanation: `Karşıt önerme: hem öncül hem sonuç tersine döner. → ${item.karsit}`,
-      _hash: this._h('karsit_' + item.orijinal)
-    };
-  }
+    .home-title {
+      margin: 0;
+      line-height: 1.05;
+      font-size: clamp(1.7rem, 5vw, 3rem);
+      letter-spacing: 0.35px;
+      text-wrap: balance;
+    }
 
-  /* 13. KARŞIT TERS */
-  karsiters() {
-    const liste = [
-      { orijinal:'"Yağmur yağarsa yerler ıslanır."', ters:'"Yerler ıslanırsa yağmur yağmıştır."', karsit:'"Yağmur yağmazsa yerler ıslanmaz."', ktersit:'"Yerler ıslanmazsa yağmur yağmamıştır."' },
-      { orijinal:'"Çalışırsan sınavı geçersin."', ters:'"Sınavı geçersen çalışmışsındır."', karsit:'"Çalışmazsan sınavı geçemezsin."', ktersit:'"Sınavı geçemezsen çalışmamışsındır."' },
-      { orijinal:'"Hava soğuksa kar yağar."', ters:'"Kar yağarsa hava soğuktur."', karsit:'"Hava soğuk değilse kar yağmaz."', ktersit:'"Kar yağmazsa hava soğuk değildir."' },
-      { orijinal:'"Aç olursan yersin."', ters:'"Yersen aç olmuşsundur."', karsit:'"Aç olmazsan yemezsin."', ktersit:'"Yemezsen aç değilsindir."' },
-    ];
-    const item = liste[Math.floor(Math.random() * liste.length)];
-    const choices = this._shuffle([item.ters, item.karsit, item.ktersit]);
-    return {
-      vars: null,
-      expression: `${item.orijinal}\n\nBu önermenin KARŞIT TERSİ hangisidir?\n(Sonucun tersi ⇒ öncülün tersi)`,
-      answer: choices.indexOf(item.ktersit),
-      answerType: 'choice',
-      choices,
-      explanation: `Karşıt ters: orijinal önermeyle mantıkça denktir. → ${item.ktersit}`,
-      _hash: this._h('karsiters_' + item.orijinal)
-    };
-  }
+    .home-title .accent {
+      background: linear-gradient(90deg, #bda6ff, #8bead6);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
 
-  /* 14. TOTOLOJİ */
-  totoloji() {
-    const liste = [
-      { expr:'p ∨ (p ⇒ q)', isToto: true, aciklama: 'Bu ifade her zaman Doğru\'dur (totoloji).' },
-      { expr:'p ⇒ p', isToto: true, aciklama: 'Bir şey kendisini gerektirir — her zaman Doğru.' },
-      { expr:'(p ∧ q) ⇒ p', isToto: true, aciklama: '"p ve q ise p" — p zaten içeride, her zaman Doğru.' },
-      { expr:'p ⇒ (p ∨ q)', isToto: true, aciklama: '"p ise p veya q" — p doğruysa p∨q da doğru.' },
-      { expr:'(p ⇒ q) ∨ (q ⇒ p)', isToto: true, aciklama: 'İki koşulludan biri her zaman sağlanır.' },
-      { expr:'p ∧ q', isToto: false, aciklama: 'p Doğru q Yanlış olduğunda Yanlış → totoloji değil.' },
-      { expr:'p ⇒ q', isToto: false, aciklama: 'p Doğru, q Yanlış olduğunda Yanlış → totoloji değil.' },
-      { expr:'p ∨ q', isToto: false, aciklama: 'İkisi de Yanlış olduğunda Yanlış → totoloji değil.' },
-      { expr:'p ⇔ q', isToto: false, aciklama: 'Farklı değerler aldığında Yanlış → totoloji değil.' },
-    ];
-    const item = liste[Math.floor(Math.random() * liste.length)];
-    return {
-      vars: null,
-      expression: `${item.expr}\n\nBu ifade her zaman Doğru mudur? (Totoloji mi?)`,
-      answer: item.isToto,
-      answerType: 'boolean',
-      answerLabels: ['Evet, her zaman Doğru', 'Hayır, değil'],
-      explanation: item.aciklama,
-      _hash: this._h('toto_' + item.expr)
-    };
-  }
+    .home-subtitle {
+      margin: 0;
+      max-width: 64ch;
+      color: #c5cee5;
+      line-height: 1.5;
+      font-size: 0.96rem;
+    }
 
-  /* 15. ÇELİŞKİ */
-  celiski() {
-    const choices2 = this._shuffle([
-      'Bir önerme hem Doğru hem Yanlış olduğunda',
-      'Bir önerme her durumda Yanlış olduğunda',
-      'Bir önerme bazen Doğru bazen Yanlış olduğunda',
-      'Bir önerme her zaman Doğru olduğunda'
-    ]);
-    return {
-      vars: null,
-      expression: '"Çelişki" ne zaman oluşur?',
-      answer: choices2.indexOf('Bir önerme her durumda Yanlış olduğunda'),
-      answerType: 'choice',
-      choices: choices2,
-      explanation: 'Çelişki: Doğruluk değerleri ne olursa olsun hep Yanlış olan bir önermedir.',
-      _hash: this._h('celiskirul_' + Math.random().toString(36).slice(2,6))
-    };
-  }
+    .home-grid {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      grid-template-columns: 1.25fr 1fr;
+      gap: 1rem;
+      align-items: stretch;
+    }
 
-  /* 16. MANTIKSAL DENKLİK */
-  denk() {
-    const liste = [
-      { a:'p ⇒ q', b:'Eğer p ise q', eq:true },
-      { a:'p ⇒ q', b:'q ⇒ p (ters önerme)', eq:false },
-      { a:'p ⇒ q', b:'Karşıt tersi (q yanlışsa p yanlış)', eq:true },
-      { a:'p ∧ q', b:'q ∧ p', eq:true },
-      { a:'p ∨ q', b:'q ∨ p', eq:true },
-      { a:'p ⇒ q', b:'p ∧ q', eq:false },
-      { a:'p ⇔ q', b:'(p ⇒ q) ∧ (q ⇒ p)', eq:true },
-      { a:'p ⇒ q', b:'p ⇔ q', eq:false },
-    ];
-    const item = liste[Math.floor(Math.random() * liste.length)];
-    return {
-      vars: null,
-      expression: `"${item.a}" ile "${item.b}"\n\nBu iki ifade her zaman aynı doğruluk değerini verir mi?`,
-      answer: item.eq,
-      answerType: 'boolean',
-      answerLabels: ['Evet, denktirler', 'Hayır, denk değiller'],
-      explanation: item.eq
-        ? `Evet, "${item.a}" ile "${item.b}" mantıkça denktir.`
-        : `Hayır, "${item.a}" ile "${item.b}" farklı durumlarda farklı değer alabilir.`,
-      _hash: this._h('denk_' + item.a + item.b)
-    };
-  }
+    .difficulty-panel,
+    .authors-panel {
+      border-radius: 16px;
+      border: 1px solid rgba(159, 168, 255, 0.25);
+      background: rgba(19, 24, 47, 0.72);
+      padding: 0.95rem;
+      backdrop-filter: blur(3px);
+    }
 
-  /* 17. İSE — bileşik koşullu */
-  ance_bilesik() {
-    const vars = this._makeVars(2);
-    const [a, b] = Object.keys(vars);
-    const sablonlar = [
-      { expr:`(${a} ∧ ${b}) ⇒ ${a}`, result:!(vars[a]&&vars[b])||vars[a], expl:`${a}∧${b}=${this._bstr(vars[a]&&vars[b])}, sonra ⇒${a}` },
-      { expr:`${a} ⇒ (${a} ∨ ${b})`, result:!vars[a]||(vars[a]||vars[b]), expl:`${a}∨${b}=${this._bstr(vars[a]||vars[b])}, sonra ${a}⇒(${a}∨${b})` },
-      { expr:`${a} ⇒ (${b} ⇒ ${a})`, result:!vars[a]||(!vars[b]||vars[a]), expl:`${b}⇒${a}=${this._bstr(!vars[b]||vars[a])}, sonra ${a}⇒...` },
-    ];
-    const s = sablonlar[Math.floor(Math.random() * sablonlar.length)];
-    return {
-      vars,
-      expression: s.expr,
-      answer: s.result,
-      answerType: 'boolean',
-      explanation: s.expl + ` → Sonuç: ${this._bstr(s.result)}`,
-      _hash: this._h(`ancebil_${s.expr}_${JSON.stringify(vars)}`)
-    };
-  }
+    .panel-title {
+      margin: 0 0 0.65rem;
+      color: #cfd6f1;
+      font-size: 0.88rem;
+      letter-spacing: 0.25px;
+      text-transform: uppercase;
+    }
 
-  /* 18. DOĞRULUK SATIRI */
-  dogrulukSatiri() {
-    const vars = this._makeVars(2);
-    const [a, b] = Object.keys(vars);
-    const ifadeler = [
-      { expr:`${a} ∧ ${b}`, result:vars[a]&&vars[b] },
-      { expr:`${a} ∨ ${b}`, result:vars[a]||vars[b] },
-      { expr:`${a} ⇒ ${b}`, result:!vars[a]||vars[b] },
-      { expr:`${a} ⇔ ${b}`, result:vars[a]===vars[b] },
-      { expr:`(${a} ∧ ${b}) ∨ ${a}`, result:(vars[a]&&vars[b])||vars[a] },
-      { expr:`${a} ∧ (${b} ∨ ${a})`, result:vars[a]&&(vars[b]||vars[a]) },
-    ];
-    const item = ifadeler[Math.floor(Math.random() * ifadeler.length)];
-    return {
-      vars,
-      expression: `Doğruluk tablosunda:\n${a} = ${this._bstr(vars[a])}, ${b} = ${this._bstr(vars[b])}\n\n${item.expr} = ?`,
-      answer: item.result,
-      answerType: 'boolean',
-      explanation: `${item.expr} ifadesinin bu değerler için sonucu: ${this._bstr(item.result)}`,
-      _hash: this._h(`dtablo_${item.expr}_${JSON.stringify(vars)}`)
-    };
-  }
-}
+    .difficulty-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0.65rem;
+    }
 
+    .difficulty-btn {
+      border: 1px solid rgba(159, 168, 255, 0.3);
+      background: linear-gradient(155deg, #2f3869, #272f59);
+      color: var(--text);
+      border-radius: 13px;
+      padding: 0.8rem;
+      text-align: left;
+      cursor: pointer;
+      transition: transform 0.16s ease, border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+      min-height: 112px;
+    }
 
-/**
- * ============================================
- * ANA OYUN SINIFI
- * ============================================
- */
-class LogicLabyrinth {
-  constructor() {
-    this.difficulty = 'medium';
-    this.level = 1;
-    this.moves = 0;
-    this.gatesOpened = 0;
-    this.totalGates = 0;
-    this.wrongAnswers = 0;
-    this.streak = 0;
-    this.bestStreak = 0;
-    this.playerPos = { x: 0, y: 0 };
-    this.goalPos = { x: 0, y: 0 };
-    this.grid = [];
-    this.rows = 0;
-    this.cols = 0;
-    this.isModalOpen = false;
-    this.pendingGate = null;
-    this.pendingDirection = null;
-    this.currentQuestion = null;
-    this.questionGenerator = new QuestionGenerator();
+    .difficulty-btn:hover {
+      transform: translateY(-2px);
+      border-color: rgba(159, 168, 255, 0.7);
+      background: linear-gradient(155deg, #3a4480, #2d3668);
+      box-shadow: 0 10px 20px rgba(5, 8, 20, 0.3);
+    }
 
-    this.difficultySettings = {
-      easy:   { rows: 13, cols: 13, gates: 4,  extraWallChance: 0 },
-      medium: { rows: 17, cols: 17, gates: 7,  extraWallChance: 0.05 },
-      hard:   { rows: 21, cols: 21, gates: 10, extraWallChance: 0.1  }
-    };
+    .difficulty-btn strong {
+      display: block;
+      margin-bottom: 0.3rem;
+      font-size: 0.98rem;
+    }
 
-    this._bindEvents();
-  }
+    .difficulty-btn small {
+      color: #b6bfd8;
+      line-height: 1.35;
+      display: block;
+    }
 
-  /** Tüm event listener'ları bağla */
-  _bindEvents() {
-    // Klavye
-    document.addEventListener('keydown', (e) => this._handleKeyDown(e));
+    .authors-panel p {
+      margin: 0;
+      color: #adb8d4;
+      font-size: 0.9rem;
+    }
 
-    // Zorluk butonları
-    document.querySelectorAll('#difficultyButtons .diff-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        this.setDifficulty(btn.dataset.diff);
-      });
-    });
+    .authors-list {
+      margin: 0.6rem 0 0;
+      padding: 0;
+      list-style: none;
+      display: grid;
+      gap: 0.55rem;
+    }
 
-    // Başla butonu
-    document.getElementById('startBtn').addEventListener('click', () => this.start());
+    .authors-list li {
+      border: 1px solid rgba(255, 255, 255, 0.11);
+      border-radius: 12px;
+      padding: 0.6rem 0.7rem;
+      background: rgba(255, 255, 255, 0.04);
+      color: #edf1ff;
+      font-weight: 600;
+    }
 
-    // D-pad butonları
-    document.querySelectorAll('.dpad-btn').forEach(btn => {
-      const dirMap = { up: [0,-1], down: [0,1], left: [-1,0], right: [1,0] };
-      const dir = dirMap[btn.dataset.dir];
-      if (dir) {
-        btn.addEventListener('click', () => this.move(dir[0], dir[1]));
+    .header {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem 1rem;
+      justify-content: space-between;
+      align-items: center;
+      background: linear-gradient(145deg, var(--panel), #1b1f34);
+      border: 1px solid rgba(159, 168, 255, 0.2);
+      border-radius: var(--radius);
+      padding: 0.9rem 1rem;
+      box-shadow: var(--shadow);
+    }
+
+    .title-wrap h1 {
+      margin: 0;
+      letter-spacing: 0.4px;
+      font-size: clamp(1.1rem, 1.4rem, 1.6rem);
+    }
+
+    .subtitle {
+      margin: 0.2rem 0 0;
+      font-size: 0.92rem;
+      color: var(--muted);
+    }
+
+    .stats {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.55rem;
+      align-items: center;
+      justify-content: flex-end;
+    }
+
+    .pill {
+      border-radius: 999px;
+      background: var(--panel-2);
+      border: 1px solid rgba(159, 168, 255, 0.25);
+      padding: 0.35rem 0.75rem;
+      font-size: 0.86rem;
+      color: var(--text);
+      white-space: nowrap;
+    }
+
+    .btn {
+      border: 1px solid rgba(159, 168, 255, 0.35);
+      background: #30385f;
+      color: var(--text);
+      border-radius: 999px;
+      padding: 0.45rem 0.9rem;
+      cursor: pointer;
+      transition: transform 0.18s ease, background 0.2s ease, border-color 0.2s ease;
+    }
+
+    .btn:hover {
+      background: #394170;
+      border-color: rgba(159, 168, 255, 0.6);
+      transform: translateY(-1px);
+    }
+
+    .btn:active {
+      transform: translateY(0);
+    }
+
+    .board-card {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1rem;
+      background: linear-gradient(160deg, #1a1f36, #171b2f);
+      border: 1px solid rgba(159, 168, 255, 0.16);
+      border-radius: var(--radius);
+      padding: 1rem;
+      box-shadow: var(--shadow);
+    }
+
+    .maze {
+      --cols: 10;
+      --cell-gap: 2px;
+      display: grid;
+      grid-template-columns: repeat(var(--cols), var(--cell-size));
+      justify-content: center;
+      gap: var(--cell-gap);
+      width: 100%;
+      overflow: auto;
+      padding: 0.4rem;
+      border-radius: 10px;
+      background: rgba(9, 12, 24, 0.5);
+      border: 1px solid rgba(159, 168, 255, 0.15);
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .cell {
+      width: var(--cell-size);
+      height: var(--cell-size);
+      border-radius: 8px;
+      position: relative;
+      transition: transform 0.22s ease, background-color 0.22s ease;
+      background: #2a3257;
+    }
+
+    .cell.path {
+      background: #232a49;
+    }
+
+    .cell.wall {
+      background: linear-gradient(145deg, #6974a1, var(--wall));
+      box-shadow:
+        inset 0 0 0 1px rgba(240, 244, 255, 0.2),
+        inset 0 -4px 8px rgba(0, 0, 0, 0.18);
+    }
+
+    .cell.gate {
+      background: linear-gradient(145deg, #4a5394, #3d447d);
+      border: 1px solid rgba(159, 168, 255, 0.55);
+    }
+
+    .cell.gate::after {
+      content: "∴";
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      color: #d8ddff;
+      font-size: 0.95rem;
+    }
+
+    .cell.goal {
+      background: linear-gradient(145deg, #8d6e1e, #b38a27);
+      box-shadow: 0 0 0 1px rgba(255, 230, 156, 0.25) inset;
+    }
+
+    .cell.goal::after {
+      content: "✦";
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      color: #ffefb0;
+      font-size: 1rem;
+    }
+
+    .cell.player::before {
+      content: "";
+      position: absolute;
+      width: 58%;
+      height: 58%;
+      left: 21%;
+      top: 21%;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 35%, #d7b8ff, var(--player));
+      box-shadow: 0 0 8px rgba(179, 136, 255, 0.6);
+      animation: pulse 1.2s ease-in-out infinite alternate;
+    }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.55rem;
+      justify-content: center;
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+
+    .legend span {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.25rem 0.45rem;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    .dot-player { background: var(--player); }
+    .dot-goal { background: var(--goal); }
+    .dot-gate { background: var(--gate); }
+    .dot-wall { background: var(--wall); }
+
+    .controls {
+      display: grid;
+      justify-content: center;
+      gap: 0.45rem;
+      margin-top: 0.2rem;
+      user-select: none;
+      touch-action: manipulation;
+    }
+
+    .controls-row {
+      --dpad-size: 56px;
+      display: grid;
+      grid-template-columns: repeat(3, var(--dpad-size));
+      justify-content: center;
+      gap: 0.45rem;
+    }
+
+    .dpad-btn {
+      width: var(--dpad-size);
+      height: var(--dpad-size);
+      border-radius: 14px;
+      border: 1px solid rgba(159, 168, 255, 0.35);
+      background: linear-gradient(145deg, #343c69, #2a3159);
+      color: var(--text);
+      font-size: 1.15rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.15s ease, background 0.18s ease;
+    }
+
+    .dpad-btn:active {
+      transform: scale(0.97);
+      background: #3a4374;
+    }
+
+    .dpad-btn.ghost {
+      visibility: hidden;
+    }
+
+    .notice {
+      min-height: 1.25rem;
+      text-align: center;
+      font-size: 0.92rem;
+      color: var(--muted);
+      transition: color 0.2s ease;
+    }
+
+    .notice.success { color: var(--correct); }
+    .notice.error { color: var(--wrong); }
+
+    .shake {
+      animation: shake 300ms ease-in-out;
+    }
+
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(9, 10, 18, 0.65);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 50;
+      padding: 1rem;
+    }
+
+    .overlay.show {
+      display: flex;
+    }
+
+    .modal {
+      width: min(100%, 520px);
+      background: linear-gradient(155deg, #202540, #1a1f35);
+      border: 1px solid rgba(159, 168, 255, 0.28);
+      border-radius: var(--radius);
+      padding: 1rem;
+      box-shadow: var(--shadow);
+      transform: translateY(6px);
+      opacity: 0;
+      transition: all 0.22s ease;
+    }
+
+    .overlay.show .modal {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    .modal h2 {
+      margin: 0 0 0.4rem;
+      font-size: 1.1rem;
+    }
+
+    .modal p {
+      margin: 0.2rem 0;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+
+    .question-box {
+      margin: 0.8rem 0 0.95rem;
+      padding: 0.75rem;
+      border-radius: 12px;
+      background: rgba(157, 169, 255, 0.09);
+      border: 1px solid rgba(159, 168, 255, 0.24);
+      font-size: 0.98rem;
+      line-height: 1.45;
+    }
+
+    .choice-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.55rem;
+    }
+
+    .choice-btn {
+      flex: 1 1 120px;
+      padding: 0.62rem 0.7rem;
+      border: 1px solid rgba(159, 168, 255, 0.35);
+      background: #2f3760;
+      color: var(--text);
+      border-radius: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s ease, transform 0.16s ease, border-color 0.2s ease;
+    }
+
+    .choice-btn:hover {
+      background: #394172;
+      border-color: rgba(159, 168, 255, 0.62);
+      transform: translateY(-1px);
+    }
+
+    .choice-btn:focus-visible,
+    .btn:focus-visible,
+    .dpad-btn:focus-visible {
+      outline: 2px solid var(--focus);
+      outline-offset: 2px;
+    }
+
+    .feedback {
+      margin-top: 0.7rem;
+      min-height: 1.2rem;
+      font-size: 0.91rem;
+      color: var(--muted);
+    }
+
+    .feedback.ok { color: var(--correct); }
+    .feedback.bad { color: var(--wrong); }
+
+    @keyframes pulse {
+      from { transform: scale(0.98); }
+      to { transform: scale(1.06); }
+    }
+
+    @keyframes shake {
+      0% { transform: translateX(0); }
+      25% { transform: translateX(-4px); }
+      50% { transform: translateX(4px); }
+      75% { transform: translateX(-3px); }
+      100% { transform: translateX(0); }
+    }
+
+    @media (min-width: 850px) {
+      .board-card {
+        grid-template-columns: minmax(0, 1fr) 220px;
+        align-items: center;
       }
-    });
 
-    // HUD: Menüye dön butonu
-    document.getElementById('btnHome').addEventListener('click', () => this.confirmHome());
-
-    // Confirm modal butonları
-    document.getElementById('btnCancelHome').addEventListener('click', () => this.cancelHome());
-    document.getElementById('btnConfirmHome').addEventListener('click', () => this.goHome());
-
-    // Win modal butonları
-    document.getElementById('btnNextLevel').addEventListener('click', () => this.nextLevel());
-    document.getElementById('btnWinHome').addEventListener('click', () => this.goHome());
-
-    // Pencere boyutu değişince labirenti tekrar çiz
-    window.addEventListener('resize', () => {
-      if (document.getElementById('gameScreen').style.display === 'flex') {
-        this._render();
+      .controls {
+        margin-top: 0;
       }
-    });
-  }
+    }
 
-  setDifficulty(diff) {
-    this.difficulty = diff;
-    document.querySelectorAll('#difficultyButtons .diff-btn').forEach(btn => {
-      btn.classList.toggle('selected', btn.dataset.diff === diff);
-    });
-  }
+    @media (max-width: 900px) {
+      body {
+        padding: 0.7rem;
+      }
 
-  start() {
-    document.getElementById('startScreen').style.display = 'none';
-    const gs = document.getElementById('gameScreen');
-    gs.style.display = 'flex';
-    gs.style.animation = 'fadeIn 0.4s ease-out';
-    this.level = 1;
-    this.questionGenerator.askedHashes.clear();
-    this._initLevel();
-  }
+      .home-grid {
+        grid-template-columns: 1fr;
+      }
 
-  confirmHome() {
-    if (this.isModalOpen) return;
-    this.isModalOpen = true;
-    document.getElementById('confirmModal').classList.add('active');
-  }
+      .difficulty-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
 
-  cancelHome() {
-    document.getElementById('confirmModal').classList.remove('active');
-    this.isModalOpen = false;
-  }
+      .header {
+        flex-direction: column;
+        align-items: stretch;
+      }
 
-  goHome() {
-    this._hideAllModals();
-    document.getElementById('gameScreen').style.display = 'none';
-    const ss = document.getElementById('startScreen');
-    ss.style.display = 'flex';
-    ss.style.animation = 'fadeIn 0.3s ease-out';
-    this.isModalOpen = false;
-    this.level = 1;
-    this.questionGenerator.askedHashes.clear();
-  }
+      .stats {
+        justify-content: flex-start;
+      }
 
-  nextLevel() {
-    this._hideModal('winModal');
-    this.level++;
-    this._initLevel();
-  }
+      .board-card {
+        padding: 0.8rem;
+      }
+    }
 
-  _hideAllModals() {
-    ['winModal', 'gateModal', 'confirmModal'].forEach(id => this._hideModal(id));
-    this.isModalOpen = false;
-  }
+    @media (max-width: 620px) {
+      :root {
+        --cell-size: clamp(20px, 8vw, 34px);
+      }
 
-  _initLevel() {
-    this.moves = 0;
-    this.gatesOpened = 0;
-    this.wrongAnswers = 0;
-    this.streak = 0;
-    this.bestStreak = 0;
-    this.isModalOpen = false;
-    this.pendingGate = null;
-    this.currentQuestion = null;
+      .home-card,
+      .header,
+      .board-card {
+        border-radius: 12px;
+      }
 
-    const settings = this.difficultySettings[this.difficulty];
+      .home-card {
+        border-radius: 16px;
+        padding: 1rem;
+      }
 
-    // Her seviyede labirent büyür
-    const extraSize = Math.min(Math.floor((this.level - 1) * 2), 8);
-    this.rows = settings.rows + extraSize;
-    this.cols = settings.cols + extraSize;
-    if (this.rows % 2 === 0) this.rows++;
-    if (this.cols % 2 === 0) this.cols++;
-    this.rows = Math.min(this.rows, 25);
-    this.cols = Math.min(this.cols, 25);
+      .difficulty-grid {
+        grid-template-columns: 1fr;
+      }
 
-    const extraGates = Math.floor((this.level - 1) * 1.5);
-    this.totalGates = Math.min(settings.gates + extraGates, 14);
+      .maze {
+        gap: 3px;
+        padding: 0.3rem;
+      }
 
-    this._generateMaze(settings.extraWallChance);
-    this._placeGates();
-    this._updateHUD();
-    this._render();
-  }
+      .pill,
+      .btn {
+        font-size: 0.82rem;
+      }
 
-  /* ============================================
-     MAZE GENERATION — Recursive Backtracker (DFS)
-     ============================================ */
-  _generateMaze(extraWallChance = 0) {
-    const rows = this.rows;
-    const cols = this.cols;
-    this.grid = Array.from({ length: rows }, () => Array(cols).fill(CELL.WALL));
+      .controls-row {
+        --dpad-size: 52px;
+      }
 
-    const visited = Array.from({ length: rows }, () => Array(cols).fill(false));
-    const stack = [];
-    this.grid[1][1] = CELL.PATH;
-    visited[1][1] = true;
-    stack.push([1, 1]);
+      .modal {
+        padding: 0.9rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <section class="home-card screen" id="homeScreen">
+      <div class="home-top">
+        <h1 class="home-title">Yaş 35 <span class="accent">Labirentin Yarısı</span></h1>
+        <p class="home-subtitle">
+          Karanlık bir labirentte mantık kapılarını aç, önermeleri çöz ve zorluklar arasında ilerleyerek finale ulaş.
+        </p>
+      </div>
 
-    const dirs = [[0, 2], [0, -2], [2, 0], [-2, 0]];
+      <div class="home-grid">
+        <div class="difficulty-panel">
+          <h2 class="panel-title">Zorluk Seç</h2>
+          <div class="difficulty-grid">
+            <button class="difficulty-btn" type="button" data-difficulty="kolay">
+              <strong>Kolay</strong>
+              <small>20x20 labirent, temel bağlaçlar ve metinsel önerme soruları.</small>
+            </button>
+            <button class="difficulty-btn" type="button" data-difficulty="orta">
+              <strong>Orta</strong>
+              <small>30x30 labirent, daha uzun rota, daha yoğun mantık kapıları.</small>
+            </button>
+            <button class="difficulty-btn" type="button" data-difficulty="zor">
+              <strong>Zor</strong>
+              <small>40x40 labirent, çok katmanlı yol yapısı ve yüksek engel yoğunluğu.</small>
+            </button>
+          </div>
+        </div>
 
-    while (stack.length > 0) {
-      const [cr, cc] = stack[stack.length - 1];
-      const neighbors = [];
-      for (const [dr, dc] of dirs) {
-        const nr = cr + dr, nc = cc + dc;
-        if (nr > 0 && nr < rows - 1 && nc > 0 && nc < cols - 1 && !visited[nr][nc]) {
-          neighbors.push([nr, nc, dr, dc]);
+        <div class="authors-panel">
+          <h2 class="panel-title">Hazırlayanlar</h2>
+          <ul class="authors-list">
+            <li>Pamir Açar</li>
+            <li>Ada Sivrioğlu</li>
+            <li>Ece Kırmacı</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="screen hidden" id="gameScreen">
+    <section class="header">
+      <div class="title-wrap">
+        <h1>Yaş 35 Labirentin Yarısı</h1>
+        <p class="subtitle">Önerme mantığı sorularını çöz, kapıları aç ve çıkışa ulaş.</p>
+      </div>
+      <div class="stats">
+        <span class="pill" id="stepsPill">Adım: 0</span>
+        <span class="pill" id="gatesPill">Açılan Kapı: 0</span>
+        <span class="pill" id="difficultyPill">Zorluk: -</span>
+        <button class="btn" id="resetBtn" type="button">Yeniden Başlat</button>
+        <button class="btn" id="menuBtn" type="button">Ana Sayfa</button>
+      </div>
+    </section>
+
+    <section class="board-card">
+      <div>
+        <div class="maze" id="maze" aria-label="Yaş 35 Labirentin Yarısı oyun alanı"></div>
+        <div class="legend">
+          <span><i class="dot dot-player"></i>Oyuncu</span>
+          <span><i class="dot dot-goal"></i>Çıkış</span>
+          <span><i class="dot dot-gate"></i>Mantık Kapısı</span>
+          <span><i class="dot dot-wall"></i>Duvar</span>
+        </div>
+        <div class="notice" id="notice" aria-live="polite"></div>
+      </div>
+
+      <div class="controls" aria-label="Ekran üzeri hareket kontrolleri">
+        <div class="controls-row">
+          <button class="dpad-btn ghost" type="button" aria-hidden="true"></button>
+          <button class="dpad-btn" data-dir="up" type="button" aria-label="Yukarı Git">▲</button>
+          <button class="dpad-btn ghost" type="button" aria-hidden="true"></button>
+        </div>
+        <div class="controls-row">
+          <button class="dpad-btn" data-dir="left" type="button" aria-label="Sola Git">◀</button>
+          <button class="dpad-btn" type="button" aria-label="Merkez" disabled>●</button>
+          <button class="dpad-btn" data-dir="right" type="button" aria-label="Sağa Git">▶</button>
+        </div>
+        <div class="controls-row">
+          <button class="dpad-btn ghost" type="button" aria-hidden="true"></button>
+          <button class="dpad-btn" data-dir="down" type="button" aria-label="Aşağı Git">▼</button>
+          <button class="dpad-btn ghost" type="button" aria-hidden="true"></button>
+        </div>
+      </div>
+    </section>
+    </section>
+  </div>
+
+  <div class="overlay" id="questionOverlay" role="dialog" aria-modal="true" aria-labelledby="logicTitle">
+    <div class="modal">
+      <h2 id="logicTitle">Mantık Kapısı Sınavı</h2>
+      <p>Kapıyı açmak için doğru cevabı seç.</p>
+      <div class="question-box" id="questionText">Soru burada görünecek</div>
+      <div class="choice-row">
+        <button class="choice-btn" id="answerTrue" type="button">Doğru</button>
+        <button class="choice-btn" id="answerFalse" type="button">Yanlış</button>
+      </div>
+      <div class="feedback" id="questionFeedback" aria-live="polite"></div>
+    </div>
+  </div>
+
+  <div class="overlay" id="winOverlay" role="dialog" aria-modal="true" aria-labelledby="winTitle">
+    <div class="modal">
+      <h2 id="winTitle">Kazandın!</h2>
+      <p id="winMessage">Önerme mantığını kullanarak labirentten çıkmayı başardın.</p>
+      <p id="winStats"></p>
+      <div class="choice-row">
+        <button class="choice-btn" id="playAgainBtn" type="button">Tekrar Oyna</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    class LogicLabyrinthGame {
+      constructor() {
+        this.rows = 10;
+        this.cols = 10;
+        this.grid = [];
+        this.player = { r: 1, c: 1 };
+        this.goal = { r: 8, c: 8 };
+        this.steps = 0;
+        this.openedGates = 0;
+        this.currentDifficulty = null;
+        this.lastGeneratedLayoutKeyByDifficulty = {};
+        this.nextDifficultyAfterWin = null;
+        this.pendingGate = null;
+        this.currentQuestion = null;
+        this.locked = false;
+        this.cellEls = [];
+        this.baseLayout = [];
+        this.difficultyConfigs = {
+          kolay: { size: 20, minRouteGates: 5 },
+          orta: { size: 30, minRouteGates: 9 },
+          zor: { size: 40, minRouteGates: 14 }
+        };
+
+        this.homeScreenEl = document.getElementById("homeScreen");
+        this.gameScreenEl = document.getElementById("gameScreen");
+        this.mazeEl = document.getElementById("maze");
+        this.noticeEl = document.getElementById("notice");
+        this.stepsPillEl = document.getElementById("stepsPill");
+        this.gatesPillEl = document.getElementById("gatesPill");
+        this.difficultyPillEl = document.getElementById("difficultyPill");
+        this.resetBtnEl = document.getElementById("resetBtn");
+        this.menuBtnEl = document.getElementById("menuBtn");
+
+        this.questionOverlayEl = document.getElementById("questionOverlay");
+        this.questionTextEl = document.getElementById("questionText");
+        this.questionFeedbackEl = document.getElementById("questionFeedback");
+        this.answerTrueEl = document.getElementById("answerTrue");
+        this.answerFalseEl = document.getElementById("answerFalse");
+
+        this.winOverlayEl = document.getElementById("winOverlay");
+        this.winTitleEl = document.getElementById("winTitle");
+        this.winMessageEl = document.getElementById("winMessage");
+        this.winStatsEl = document.getElementById("winStats");
+        this.playAgainBtnEl = document.getElementById("playAgainBtn");
+      }
+
+      init() {
+        this.attachEvents();
+        this.showHome();
+      }
+
+      attachEvents() {
+        document.addEventListener("keydown", (event) => {
+          if (this.locked) return;
+          const keyMap = {
+            ArrowUp: "up",
+            ArrowDown: "down",
+            ArrowLeft: "left",
+            ArrowRight: "right"
+          };
+          const dir = keyMap[event.key];
+          if (dir) {
+            event.preventDefault();
+            this.move(dir);
+          }
+        });
+
+        document.querySelectorAll("[data-dir]").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            if (this.locked) return;
+            this.move(btn.dataset.dir);
+          });
+        });
+
+        this.resetBtnEl.addEventListener("click", () => this.reset());
+        this.menuBtnEl.addEventListener("click", () => this.showHome());
+        this.playAgainBtnEl.addEventListener("click", () => this.handleWinAction());
+        this.answerTrueEl.addEventListener("click", () => this.submitAnswer(true));
+        this.answerFalseEl.addEventListener("click", () => this.submitAnswer(false));
+
+        document.querySelectorAll("[data-difficulty]").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            this.startGame(btn.dataset.difficulty);
+          });
+        });
+
+        window.addEventListener("resize", () => {
+          if (this.gameScreenEl.classList.contains("hidden")) return;
+          this.updateMazeSizing();
+        });
+      }
+
+      showHome() {
+        this.locked = true;
+        this.nextDifficultyAfterWin = null;
+        this.questionOverlayEl.classList.remove("show");
+        this.winOverlayEl.classList.remove("show");
+        this.homeScreenEl.classList.remove("hidden");
+        this.gameScreenEl.classList.add("hidden");
+      }
+
+      startGame(difficulty) {
+        this.currentDifficulty = this.difficultyConfigs[difficulty] ? difficulty : "orta";
+        this.homeScreenEl.classList.add("hidden");
+        this.gameScreenEl.classList.remove("hidden");
+        this.reset();
+      }
+
+      createNewMazeForCurrentDifficulty() {
+        const config = this.difficultyConfigs[this.currentDifficulty] || this.difficultyConfigs.orta;
+        let generated = this.generateMazeLayout(config.size, config.size);
+        const previousKey = this.lastGeneratedLayoutKeyByDifficulty[this.currentDifficulty];
+        let key = generated.join("");
+        let attempts = 0;
+        while (previousKey && key === previousKey && attempts < 10) {
+          generated = this.generateMazeLayout(config.size, config.size);
+          key = generated.join("");
+          attempts += 1;
+        }
+        this.lastGeneratedLayoutKeyByDifficulty[this.currentDifficulty] = key;
+        this.baseLayout = generated;
+        this.rows = this.baseLayout.length;
+        this.cols = this.baseLayout[0].length;
+      }
+
+      reset() {
+        if (!this.currentDifficulty) {
+          this.currentDifficulty = "orta";
+        }
+        this.createNewMazeForCurrentDifficulty();
+        this.steps = 0;
+        this.openedGates = 0;
+        this.pendingGate = null;
+        this.currentQuestion = null;
+        this.locked = false;
+        this.questionOverlayEl.classList.remove("show");
+        this.winOverlayEl.classList.remove("show");
+        this.setNotice("Hareket etmek için ok tuşlarını veya dokunmatik kontrolleri kullan.", "");
+        this.setupGridFromLayout();
+        this.renderGrid();
+        this.updateStats();
+      }
+
+      setupGridFromLayout() {
+        this.grid = [];
+        for (let r = 0; r < this.rows; r++) {
+          const row = [];
+          for (let c = 0; c < this.cols; c++) {
+            const token = this.baseLayout[r][c];
+            let type = "path";
+            if (token === "#") type = "wall";
+            if (token === "G") type = "gate";
+            if (token === "S") {
+              type = "path";
+              this.player = { r, c };
+            }
+            if (token === "E") {
+              type = "goal";
+              this.goal = { r, c };
+            }
+            row.push({ type });
+          }
+          this.grid.push(row);
+        }
+        this.ensureRouteHasGates();
+      }
+
+      generateMazeLayout(rows, cols) {
+        const maze = Array.from({ length: rows }, () => Array(cols).fill("#"));
+        const inBounds = (r, c) => r > 0 && c > 0 && r < rows - 1 && c < cols - 1;
+        const steps = [
+          [0, 2], [0, -2], [2, 0], [-2, 0]
+        ];
+
+        const stack = [[1, 1]];
+        maze[1][1] = ".";
+
+        while (stack.length > 0) {
+          const [r, c] = stack[stack.length - 1];
+          const dirs = this.shuffleArray([...steps]);
+          let carved = false;
+
+          for (const [dr, dc] of dirs) {
+            const nr = r + dr;
+            const nc = c + dc;
+            if (!inBounds(nr, nc) || maze[nr][nc] !== "#") continue;
+            maze[r + dr / 2][c + dc / 2] = ".";
+            maze[nr][nc] = ".";
+            stack.push([nr, nc]);
+            carved = true;
+            break;
+          }
+
+          if (!carved) stack.pop();
+        }
+
+        const extraOpenings = Math.floor((rows * cols) * 0.06);
+        for (let i = 0; i < extraOpenings; i++) {
+          const rr = 1 + Math.floor(Math.random() * (rows - 2));
+          const cc = 1 + Math.floor(Math.random() * (cols - 2));
+          if (maze[rr][cc] === "#") maze[rr][cc] = ".";
+        }
+
+        const goalR = rows % 2 === 0 ? rows - 3 : rows - 2;
+        const goalC = cols % 2 === 0 ? cols - 3 : cols - 2;
+        maze[1][1] = "S";
+        maze[goalR][goalC] = "E";
+
+        return maze.map((row) => row.join(""));
+      }
+
+      shuffleArray(arr) {
+        for (let i = arr.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [arr[i], arr[j]] = [arr[j], arr[i]];
+        }
+        return arr;
+      }
+
+      ensureRouteHasGates() {
+        const minRequired = (this.difficultyConfigs[this.currentDifficulty]?.minRouteGates) || 8;
+        const path = this.findShortestPath();
+        if (!path || path.length < 3) return;
+
+        const innerPath = path.slice(1, -1); // baslangic ve cikis haric
+        const existingOnPath = innerPath.filter((pos) => this.grid[pos.r][pos.c].type === "gate");
+        const needed = Math.max(0, minRequired - existingOnPath.length);
+        if (needed === 0) return;
+
+        const candidates = innerPath.filter((pos) => this.grid[pos.r][pos.c].type === "path");
+        // Sira ile dagitip ayni oyunda en az belirli sayida engel olmasini garanti eder.
+        for (let i = 0; i < Math.min(needed, candidates.length); i++) {
+          const idx = Math.floor(((i + 1) * candidates.length) / (Math.min(needed, candidates.length) + 1));
+          const cell = candidates[idx];
+          this.grid[cell.r][cell.c].type = "gate";
         }
       }
-      if (neighbors.length === 0) {
-        stack.pop();
-      } else {
-        const [nr, nc, dr, dc] = neighbors[Math.floor(Math.random() * neighbors.length)];
-        this.grid[cr + Math.round(dr / 2)][cc + Math.round(dc / 2)] = CELL.PATH;
-        this.grid[nr][nc] = CELL.PATH;
-        visited[nr][nc] = true;
-        stack.push([nr, nc]);
-      }
-    }
 
-    // Extra walls for complexity
-    if (extraWallChance > 0) {
-      for (let r = 1; r < rows - 1; r++) {
-        for (let c = 1; c < cols - 1; c++) {
-          if (this.grid[r][c] === CELL.PATH && Math.random() < extraWallChance) {
-            this.grid[r][c] = CELL.WALL;
+      findShortestPath() {
+        const dirs = [
+          { dr: -1, dc: 0 },
+          { dr: 1, dc: 0 },
+          { dr: 0, dc: -1 },
+          { dr: 0, dc: 1 }
+        ];
+        const start = { r: this.player.r, c: this.player.c };
+        const target = { r: this.goal.r, c: this.goal.c };
+        const queue = [start];
+        const visited = new Set([`${start.r},${start.c}`]);
+        const prev = new Map();
+
+        while (queue.length > 0) {
+          const cur = queue.shift();
+          if (cur.r === target.r && cur.c === target.c) break;
+
+          for (const d of dirs) {
+            const nr = cur.r + d.dr;
+            const nc = cur.c + d.dc;
+            if (!this.isInside(nr, nc)) continue;
+            if (this.grid[nr][nc].type === "wall") continue;
+            const key = `${nr},${nc}`;
+            if (visited.has(key)) continue;
+            visited.add(key);
+            prev.set(key, `${cur.r},${cur.c}`);
+            queue.push({ r: nr, c: nc });
           }
         }
-      }
-    }
 
-    // Player
-    this.playerPos = { x: 1, y: 1 };
-    this.grid[1][1] = CELL.PLAYER;
+        const endKey = `${target.r},${target.c}`;
+        if (!visited.has(endKey)) return null;
 
-    // Goal
-    let goalR = rows - 2, goalC = cols - 2;
-    outer: for (let dr = 0; dr < 4; dr++) {
-      for (let dc = 0; dc < 4; dc++) {
-        const gr = rows - 2 - dr, gc = cols - 2 - dc;
-        if (gr > 0 && gc > 0 && this.grid[gr][gc] === CELL.PATH) {
-          goalR = gr; goalC = gc;
-          break outer;
-        }
-      }
-    }
-    this.goalPos = { x: goalC, y: goalR };
-    this.grid[goalR][goalC] = CELL.GOAL;
-
-    // Ensure solvable
-    const testPath = this._findPath(this.playerPos, this.goalPos);
-    if (!testPath) {
-      for (let r = 1; r < rows - 1; r++) {
-        for (let c = 1; c < cols - 1; c++) {
-          if (this.grid[r][c] === CELL.WALL && visited[r][c]) {
-            this.grid[r][c] = CELL.PATH;
-          }
-        }
-      }
-      this.grid[goalR][goalC] = CELL.GOAL;
-      this.grid[1][1] = CELL.PLAYER;
-    }
-  }
-
-  _placeGates() {
-    const path = this._findPath(this.playerPos, this.goalPos);
-    if (!path || path.length < 6) return;
-
-    const candidates = path.slice(3, path.length - 2);
-    const numGates = Math.min(this.totalGates, candidates.length);
-    const spacing = Math.max(1, Math.floor(candidates.length / (numGates + 1)));
-
-    const gatePositions = [];
-    for (let i = 0; i < numGates; i++) {
-      const idx = Math.min(spacing * (i + 1), candidates.length - 1);
-      const pos = candidates[idx];
-      if (!gatePositions.some(g => g.x === pos.x && g.y === pos.y)) {
-        gatePositions.push(pos);
-      }
-    }
-
-    for (const pos of gatePositions) {
-      this.grid[pos.y][pos.x] = CELL.GATE;
-    }
-    this.totalGates = gatePositions.length;
-  }
-
-  _findPath(start, end) {
-    const visited = Array.from({ length: this.rows }, () => Array(this.cols).fill(false));
-    const parent = Array.from({ length: this.rows }, () => Array(this.cols).fill(null));
-    const queue = [start];
-    visited[start.y][start.x] = true;
-    const dirs = [[0,1],[0,-1],[1,0],[-1,0]];
-
-    while (queue.length > 0) {
-      const curr = queue.shift();
-      if (curr.x === end.x && curr.y === end.y) {
         const path = [];
-        let node = curr;
-        while (node) { path.unshift(node); node = parent[node.y][node.x]; }
+        let cursor = endKey;
+        while (cursor) {
+          const [rStr, cStr] = cursor.split(",");
+          path.push({ r: Number(rStr), c: Number(cStr) });
+          cursor = prev.get(cursor);
+        }
+        path.reverse();
         return path;
       }
-      for (const [dx, dy] of dirs) {
-        const nx = curr.x + dx, ny = curr.y + dy;
-        if (nx >= 0 && nx < this.cols && ny >= 0 && ny < this.rows &&
-            !visited[ny][nx] && this.grid[ny][nx] !== CELL.WALL) {
-          visited[ny][nx] = true;
-          parent[ny][nx] = curr;
-          queue.push({ x: nx, y: ny });
+
+      renderGrid() {
+        this.mazeEl.style.setProperty("--cols", String(this.cols));
+        this.updateMazeSizing();
+        this.mazeEl.innerHTML = "";
+        this.cellEls = [];
+        for (let r = 0; r < this.rows; r++) {
+          const rowEls = [];
+          for (let c = 0; c < this.cols; c++) {
+            const cell = document.createElement("div");
+            cell.className = "cell";
+            this.mazeEl.appendChild(cell);
+            rowEls.push(cell);
+          }
+          this.cellEls.push(rowEls);
+        }
+        this.paintCells();
+      }
+
+      updateMazeSizing() {
+        const gap = this.cols >= 35 ? 1 : 2;
+        const maxBoardWidth = Math.min(window.innerWidth - 52, 900);
+        const cell = Math.floor((maxBoardWidth - (this.cols - 1) * gap) / this.cols);
+        const safeCell = Math.max(7, Math.min(28, cell));
+        this.mazeEl.style.setProperty("--cell-size", `${safeCell}px`);
+        this.mazeEl.style.setProperty("--cell-gap", `${gap}px`);
+      }
+
+      paintCells() {
+        for (let r = 0; r < this.rows; r++) {
+          for (let c = 0; c < this.cols; c++) {
+            const cellEl = this.cellEls[r][c];
+            const type = this.grid[r][c].type;
+            cellEl.className = "cell " + type;
+            if (r === this.player.r && c === this.player.c) {
+              cellEl.classList.add("player");
+            }
+          }
         }
       }
-    }
-    return null;
-  }
 
-  /* ============================================
-     MOVEMENT
-     ============================================ */
-  _handleKeyDown(e) {
-    if (this.isModalOpen) return;
-    if (document.getElementById('gameScreen').style.display === 'none') return;
-    const keyMap = {
-      ArrowUp:[0,-1], ArrowDown:[0,1], ArrowLeft:[-1,0], ArrowRight:[1,0],
-      w:[0,-1], W:[0,-1], s:[0,1], S:[0,1], a:[-1,0], A:[-1,0], d:[1,0], D:[1,0]
-    };
-    if (keyMap[e.key]) { e.preventDefault(); this.move(...keyMap[e.key]); }
-  }
-
-  move(dx, dy) {
-    if (this.isModalOpen) return;
-    const nx = this.playerPos.x + dx;
-    const ny = this.playerPos.y + dy;
-    if (nx < 0 || nx >= this.cols || ny < 0 || ny >= this.rows) return;
-    const t = this.grid[ny][nx];
-    if (t === CELL.WALL) return;
-    if (t === CELL.GATE) {
-      this.pendingGate = { x: nx, y: ny };
-      this.pendingDirection = { dx, dy };
-      this._showGateModal();
-      return;
-    }
-    this._movePlayer(nx, ny);
-  }
-
-  _movePlayer(nx, ny) {
-    this.grid[this.playerPos.y][this.playerPos.x] = CELL.PATH;
-    this.playerPos = { x: nx, y: ny };
-    this.moves++;
-
-    if (nx === this.goalPos.x && ny === this.goalPos.y) {
-      this.grid[ny][nx] = CELL.PLAYER;
-      this._updateHUD();
-      this._render();
-      setTimeout(() => this._showWinModal(), 300);
-      return;
-    }
-
-    this.grid[ny][nx] = CELL.PLAYER;
-    this._updateHUD();
-    this._render();
-  }
-
-  /* ============================================
-     GATE MODAL
-     ============================================ */
-  _showGateModal() {
-    this.isModalOpen = true;
-    this.currentQuestion = this.questionGenerator.generate(this.difficulty);
-    const q = this.currentQuestion;
-
-    const varsEl = document.getElementById('logicVars');
-    const givenLabel = document.getElementById('logicGivenLabel');
-    varsEl.innerHTML = '';
-
-    if (q.vars) {
-      givenLabel.style.display = '';
-      for (const [name, value] of Object.entries(q.vars)) {
-        const div = document.createElement('div');
-        div.className = 'logic-var';
-        div.innerHTML = `${name} = <span class="var-${value?'true':'false'}">${value?'Doğru':'Yanlış'}</span>`;
-        varsEl.appendChild(div);
+      updateStats() {
+        this.stepsPillEl.textContent = `Adım: ${this.steps}`;
+        this.gatesPillEl.textContent = `Açılan Kapı: ${this.openedGates}`;
+        const etiket = this.currentDifficulty
+          ? this.currentDifficulty[0].toUpperCase() + this.currentDifficulty.slice(1)
+          : "-";
+        this.difficultyPillEl.textContent = `Zorluk: ${etiket}`;
       }
-    } else {
-      givenLabel.style.display = 'none';
-    }
 
-    document.getElementById('logicExpr').innerHTML = q.expression.replace(/\n/g, '<br>');
+      setNotice(text, tone = "") {
+        this.noticeEl.textContent = text;
+        this.noticeEl.classList.remove("success", "error");
+        if (tone === "success") this.noticeEl.classList.add("success");
+        if (tone === "error") this.noticeEl.classList.add("error");
+      }
 
-    const promptEl = document.getElementById('logicPrompt');
-    promptEl.textContent = q.answerType === 'choice' ? 'Doğru seçeneği işaretle:' : 'Doğruluk değeri nedir?';
+      getDelta(direction) {
+        switch (direction) {
+          case "up": return { dr: -1, dc: 0 };
+          case "down": return { dr: 1, dc: 0 };
+          case "left": return { dr: 0, dc: -1 };
+          case "right": return { dr: 0, dc: 1 };
+          default: return { dr: 0, dc: 0 };
+        }
+      }
 
-    const btnContainer = document.getElementById('answerButtons');
-    btnContainer.innerHTML = '';
+      move(direction) {
+        const { dr, dc } = this.getDelta(direction);
+        const nr = this.player.r + dr;
+        const nc = this.player.c + dc;
+        if (!this.isInside(nr, nc)) return;
+        const target = this.grid[nr][nc];
 
-    if (q.answerType === 'boolean') {
-      const trueLabel  = q.answerLabels ? q.answerLabels[0] : 'Doğru';
-      const falseLabel = q.answerLabels ? q.answerLabels[1] : 'Yanlış';
-      const btnT = document.createElement('button');
-      btnT.className = 'btn btn-true'; btnT.textContent = trueLabel;
-      btnT.addEventListener('click', () => this.answerGate(true));
-      const btnF = document.createElement('button');
-      btnF.className = 'btn btn-false'; btnF.textContent = falseLabel;
-      btnF.addEventListener('click', () => this.answerGate(false));
-      btnContainer.appendChild(btnT);
-      btnContainer.appendChild(btnF);
-    } else {
-      q.choices.forEach((choice, idx) => {
-        const btn = document.createElement('button');
-        btn.className = 'btn btn-choice';
-        btn.textContent = choice;
-        btn.addEventListener('click', () => this.answerGate(idx));
-        btnContainer.appendChild(btn);
-      });
-    }
+        if (target.type === "wall") {
+          this.triggerShake();
+          this.setNotice("Önde duvar var. Başka bir yön dene.", "error");
+          return;
+        }
 
-    const feedbackEl = document.getElementById('feedbackText');
-    feedbackEl.className = 'feedback-text';
-    feedbackEl.textContent = '';
-    document.getElementById('gateModalContent').className = 'modal';
-    document.getElementById('gateModal').classList.add('active');
-  }
+        if (target.type === "gate") {
+          this.pendingGate = { r: nr, c: nc };
+          this.openQuestionModal();
+          return;
+        }
 
-  answerGate(answer) {
-    if (!this.isModalOpen || !this.currentQuestion) return;
-    const q = this.currentQuestion;
-    const correct = answer === q.answer;
-    const modalContent = document.getElementById('gateModalContent');
-    const feedbackEl = document.getElementById('feedbackText');
-    const btnContainer = document.getElementById('answerButtons');
+        this.commitMove(nr, nc);
+      }
 
-    // Disable buttons
-    btnContainer.querySelectorAll('.btn').forEach(btn => {
-      btn.style.pointerEvents = 'none';
-      btn.style.opacity = '0.5';
-    });
+      commitMove(r, c) {
+        this.player = { r, c };
+        this.steps += 1;
+        this.paintCells();
+        this.updateStats();
+        this.setNotice("Devam et.", "");
+        if (r === this.goal.r && c === this.goal.c) {
+          this.showWin();
+        }
+      }
 
-    if (correct) {
-      modalContent.classList.add('feedback-correct');
-      feedbackEl.className = 'feedback-text correct-text show';
-      feedbackEl.textContent = '✓ Doğru! ' + (q.explanation || '');
-      this.gatesOpened++;
-      this.streak++;
-      if (this.streak > this.bestStreak) this.bestStreak = this.streak;
+      isInside(r, c) {
+        return r >= 0 && c >= 0 && r < this.rows && c < this.cols;
+      }
 
-      setTimeout(() => {
-        this._hideModal('gateModal');
-        this.isModalOpen = false;
-        if (this.pendingGate) {
-          this.grid[this.pendingGate.y][this.pendingGate.x] = CELL.GATE_OPEN;
-          this._render();
+      openQuestionModal() {
+        this.currentQuestion = this.generateLogicQuestion();
+        this.questionTextEl.innerHTML = this.currentQuestion.prompt;
+        this.questionFeedbackEl.textContent = "";
+        this.questionFeedbackEl.className = "feedback";
+        this.questionOverlayEl.classList.add("show");
+        this.locked = true;
+      }
+
+      submitAnswer(userAnswer) {
+        if (!this.currentQuestion || !this.pendingGate) return;
+
+        if (userAnswer === this.currentQuestion.answer) {
+          this.questionFeedbackEl.textContent = "Doğru! Kapı açıldı.";
+          this.questionFeedbackEl.className = "feedback ok";
+
+          const { r, c } = this.pendingGate;
+          this.grid[r][c].type = "path";
+          this.openedGates += 1;
+
           setTimeout(() => {
-            this.grid[this.pendingGate.y][this.pendingGate.x] = CELL.PATH;
-            this._movePlayer(this.pendingGate.x, this.pendingGate.y);
+            this.questionOverlayEl.classList.remove("show");
+            this.locked = false;
+            this.commitMove(r, c);
+            this.setNotice("Harika mantık! Kapı açıldı.", "success");
             this.pendingGate = null;
-            this.pendingDirection = null;
-          }, 350);
+            this.currentQuestion = null;
+          }, 260);
+        } else {
+          this.questionFeedbackEl.textContent = "Yanlış cevap. Kapı kapalı kaldı.";
+          this.questionFeedbackEl.className = "feedback bad";
+          this.triggerShake();
+          this.setNotice("Yanlış cevap. Dikkatli düşünerek tekrar dene.", "error");
+          setTimeout(() => {
+            this.questionOverlayEl.classList.remove("show");
+            this.locked = false;
+            this.pendingGate = null;
+            this.currentQuestion = null;
+          }, 480);
         }
-        this._updateHUD();
-      }, 1300);
-    } else {
-      modalContent.classList.add('feedback-wrong');
-      feedbackEl.className = 'feedback-text wrong-text show';
-      feedbackEl.textContent = '✗ Yanlış! ' + (q.explanation || '');
-      this.wrongAnswers++;
-      this.streak = 0;
+      }
 
-      setTimeout(() => {
-        modalContent.classList.remove('feedback-wrong');
-        this._hideModal('gateModal');
-        this.isModalOpen = false;
-        this.pendingGate = null;
-        this.pendingDirection = null;
-        this._updateHUD();
-      }, 2500);
-    }
-  }
+      triggerShake() {
+        this.mazeEl.classList.remove("shake");
+        void this.mazeEl.offsetWidth;
+        this.mazeEl.classList.add("shake");
+      }
 
-  /* ============================================
-     WIN
-     ============================================ */
-  _showWinModal() {
-    document.getElementById('winMoves').textContent = this.moves;
-    document.getElementById('winGates').textContent = this.gatesOpened;
-    document.getElementById('winAttempts').textContent = this.wrongAnswers;
-    document.getElementById('winStreak').textContent = this.bestStreak;
-    document.getElementById('winModal').classList.add('active');
-    this.isModalOpen = true;
-    this._spawnConfetti();
-  }
+      getNextDifficulty(difficulty) {
+        const order = ["kolay", "orta", "zor"];
+        const idx = order.indexOf(difficulty);
+        if (idx === -1 || idx === order.length - 1) return null;
+        return order[idx + 1];
+      }
 
-  _spawnConfetti() {
-    const container = document.getElementById('confettiContainer');
-    container.innerHTML = '';
-    const colors = ['#b388ff','#ffd54f','#69f0ae','#ff8a65','#4fc3f7','#f48fb1'];
-    for (let i = 0; i < 70; i++) {
-      const piece = document.createElement('div');
-      piece.className = 'confetti-piece';
-      piece.style.left = `${Math.random() * 100}%`;
-      piece.style.top = `${Math.random() * 40 + 10}%`;
-      piece.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-      piece.style.width = `${Math.random() * 9 + 4}px`;
-      piece.style.height = `${Math.random() * 9 + 4}px`;
-      piece.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
-      piece.style.animationDuration = `${Math.random() * 2 + 1.5}s`;
-      piece.style.animationDelay = `${Math.random() * 0.6}s`;
-      container.appendChild(piece);
-    }
-    setTimeout(() => { container.innerHTML = ''; }, 5000);
-  }
-
-  /* ============================================
-     UI HELPERS
-     ============================================ */
-  _hideModal(id) { document.getElementById(id).classList.remove('active'); }
-
-  _updateHUD() {
-    document.getElementById('hudMoves').textContent = this.moves;
-    document.getElementById('hudGates').textContent = `${this.gatesOpened} / ${this.totalGates}`;
-    document.getElementById('hudLevel').textContent = this.level;
-    document.getElementById('hudStreak').textContent = this.streak;
-  }
-
-  _render() {
-    const container = document.getElementById('mazeGrid');
-    const gameScreen = document.getElementById('gameScreen');
-
-    // Calculate available space
-    const screenW = window.innerWidth;
-    const screenH = window.innerHeight;
-
-    // Estimate space used by other elements
-    const isMobile = screenW <= 600;
-    const headerH = isMobile ? 0 : 40;  // header might be hidden on very small
-    const hudH = 36;
-    const legendH = 22;
-    const dpadH = isMobile ? 170 : 0;
-    const paddingH = 24;
-    const usedH = headerH + hudH + legendH + dpadH + paddingH;
-
-    const availW = screenW - 24;
-    const availH = screenH - usedH;
-
-    // Calculate cell size
-    const cellByW = Math.floor(availW / this.cols) - 1;
-    const cellByH = Math.floor(availH / this.rows) - 1;
-    const cellSize = Math.max(Math.min(cellByW, cellByH, 40), 14);
-    document.documentElement.style.setProperty('--cell-size', cellSize + 'px');
-
-    container.style.gridTemplateColumns = `repeat(${this.cols}, var(--cell-size))`;
-    container.style.gridTemplateRows    = `repeat(${this.rows}, var(--cell-size))`;
-
-    let html = '';
-    for (let r = 0; r < this.rows; r++) {
-      for (let c = 0; c < this.cols; c++) {
-        const t = this.grid[r][c];
-        let cls = 'cell ';
-        switch (t) {
-          case CELL.WALL:      cls += 'cell-wall'; break;
-          case CELL.PATH:      cls += 'cell-path'; break;
-          case CELL.PLAYER:    cls += 'cell-player'; break;
-          case CELL.GOAL:      cls += 'cell-goal'; break;
-          case CELL.GATE:      cls += 'cell-gate'; break;
-          case CELL.GATE_OPEN: cls += 'cell-gate-open'; break;
+      handleWinAction() {
+        this.winOverlayEl.classList.remove("show");
+        if (this.nextDifficultyAfterWin) {
+          this.currentDifficulty = this.nextDifficultyAfterWin;
+          this.reset();
+          return;
         }
-        html += `<div class="${cls}"></div>`;
+        this.showHome();
+      }
+
+      showWin() {
+        this.locked = true;
+        this.winStatsEl.textContent = `Adım: ${this.steps} | Açılan Kapı: ${this.openedGates}`;
+        const nextDifficulty = this.getNextDifficulty(this.currentDifficulty);
+        this.nextDifficultyAfterWin = nextDifficulty;
+
+        if (nextDifficulty) {
+          this.winTitleEl.textContent = "Bölüm Tamamlandı!";
+          this.winMessageEl.textContent = "Bir sonraki zorluğa geçmeye hazırsın.";
+          const nextLabel = nextDifficulty[0].toUpperCase() + nextDifficulty.slice(1);
+          this.playAgainBtnEl.textContent = `${nextLabel} seviyesine gec`;
+          this.setNotice("Sonraki zorluk acildi!", "success");
+        } else {
+          this.winTitleEl.textContent = "Tebrikler! Tüm zorluklar bitti!";
+          this.winMessageEl.textContent = "Zor bolumu tamamlayarak Logic Labyrinth'i bitirdin. Harika is!";
+          this.playAgainBtnEl.textContent = "Ana sayfaya dön";
+          this.setNotice("Büyük final! Tüm bölümleri tamamladın!", "success");
+        }
+
+        this.winOverlayEl.classList.add("show");
+      }
+
+      // 9. sınıf seviyesinde, sözel mantık bağlaçlarıyla soru üretir.
+      generateLogicQuestion() {
+        const propositionQuestions = [
+          { text: "Ankara, Türkiye'nin başkentidir.", isProposition: true },
+          { text: "Lütfen pencereyi kapat.", isProposition: false },
+          { text: "x + 3 = 10", isProposition: false },
+          { text: "Bugün hava yağmurludur.", isProposition: true },
+          { text: "Kaçıncı sınıftasın?", isProposition: false },
+          { text: "İki tek sayının toplamı çift sayıdır.", isProposition: true },
+          { text: "Bu cümle bir önerme midir?", isProposition: false },
+          { text: "Her kare bir dikdörtgendir.", isProposition: true }
+        ];
+
+        const askTextual = Math.random() < 0.35;
+        if (askTextual) {
+          const item = propositionQuestions[Math.floor(Math.random() * propositionQuestions.length)];
+          return {
+            prompt: `Aşağıdaki ifade bir <strong>önerme</strong> midir?<br><br><em>"${item.text}"</em>`,
+            answer: item.isProposition
+          };
+        }
+
+        const p = Math.random() < 0.5;
+        const q = Math.random() < 0.5;
+        const r = Math.random() < 0.5;
+        const kolaySorular = [
+          {
+            text: "p ve q",
+            solve: (x, y) => x && y
+          },
+          {
+            text: "p veya q",
+            solve: (x, y) => x || y
+          },
+          {
+            text: "p ya da q",
+            solve: (x, y) => x || y
+          },
+          {
+            text: "p değil",
+            solve: (x) => !x
+          }
+        ];
+
+        const ortaSorular = [
+          {
+            text: "p ise q",
+            solve: (x, y) => (!x) || y
+          },
+          {
+            text: "q değil veya p",
+            solve: (x, y) => (!y) || x
+          },
+          {
+            text: "p ve q ise p",
+            solve: (x, y) => (!(x && y)) || x
+          }
+        ];
+
+        const zorSorular = [
+          {
+            text: "A = {p, q}. Her önerme doğrudur.",
+            solve: (x, y) => x && y
+          },
+          {
+            text: "A = {p, q, r}. Bazı önermeler doğrudur.",
+            solve: (x, y, z) => x || y || z
+          },
+          {
+            text: "A = {p, q, r}. Her önerme doğrudur ya da bazı önermeler doğrudur.",
+            solve: (x, y, z) => (x && y && z) || (x || y || z)
+          }
+        ];
+
+        const havuz =
+          this.currentDifficulty === "kolay"
+            ? kolaySorular
+            : this.currentDifficulty === "orta"
+              ? [...kolaySorular, ...ortaSorular]
+              : [...kolaySorular, ...ortaSorular, ...zorSorular];
+
+        const selected = havuz[Math.floor(Math.random() * havuz.length)];
+        const answer = selected.solve(p, q, r);
+        const pText = p ? "Doğru" : "Yanlış";
+        const qText = q ? "Doğru" : "Yanlış";
+        const rText = r ? "Doğru" : "Yanlış";
+
+        const ifade = selected.text.includes("{p, q, r}") || selected.text.includes("r")
+          ? `<strong>p = ${pText}</strong>, <strong>q = ${qText}</strong>, <strong>r = ${rText}</strong>`
+          : `<strong>p = ${pText}</strong> ve <strong>q = ${qText}</strong>`;
+
+        const prompt = `${ifade} iken, <strong>${selected.text}</strong> ifadesinin değeri nedir?`;
+        return { prompt, answer };
       }
     }
-    container.innerHTML = html;
-  }
-}
 
-/* ============================================
-   INIT
-   ============================================ */
-const game = new LogicLabyrinth();
-</script>
-    </body>
+    const game = new LogicLabyrinthGame();
+    game.init();
+  </script>
+</body>
 </html>
